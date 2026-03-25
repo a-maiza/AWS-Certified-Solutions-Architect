@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM Amazon VPC — SAA-C03</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: #f5f5f3;
+          color: #1a1a18;
+          min-height: 100vh;
+          padding: 2rem 1rem;
+        }
+
+        .container { max-width: 720px; margin: 0 auto; }
+
+        header { margin-bottom: 2rem; }
+        header h1 { font-size: 22px; font-weight: 500; color: #1a1a18; margin-bottom: 4px; }
+        header p  { font-size: 14px; color: #73726c; }
+
+        .card {
+          background: #ffffff;
+          border: 0.5px solid rgba(0,0,0,0.12);
+          border-radius: 12px;
+          padding: 1.5rem;
+        }
+
+        .progress-bar-wrap { background: #e8e7e1; border-radius: 8px; height: 6px; margin-bottom: 1.5rem; }
+        .progress-bar      { background: #378ADD; height: 6px; border-radius: 8px; transition: width 0.4s ease; }
+
+        .q-counter { font-size: 13px; color: #73726c; margin-bottom: 0.5rem; }
+
+        .q-type-badge {
+          display: inline-block; font-size: 11px; padding: 3px 10px;
+          border-radius: 20px; margin-bottom: 0.75rem; font-weight: 500;
+        }
+        .badge-single { background: #E6F1FB; color: #185FA5; }
+        .badge-multi  { background: #FAEEDA; color: #854F0B; }
+
+        .q-text { font-size: 15px; font-weight: 500; color: #1a1a18; line-height: 1.55; margin-bottom: 1.25rem; }
+
+        .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+
+        .opt {
+          display: flex; align-items: flex-start; gap: 12px;
+          padding: 12px 14px;
+          border: 0.5px solid rgba(0,0,0,0.18);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.15s;
+          user-select: none;
+        }
+        .opt:hover    { background: #f0efeb; }
+        .opt.selected { background: #E6F1FB; border: 1.5px solid #378ADD; }
+        .opt.correct  { background: #EAF3DE; border: 1.5px solid #639922; cursor: default; }
+        .opt.wrong    { background: #FCEBEB; border: 1.5px solid #E24B4A; cursor: default; }
+        .opt.missed   { background: #EAF3DE; border: 1.5px dashed #639922; cursor: default; }
+
+        .opt-letter {
+          width: 26px; height: 26px; min-width: 26px; border-radius: 50%;
+          border: 0.5px solid rgba(0,0,0,0.18);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 12px; font-weight: 500; color: #73726c; flex-shrink: 0;
+        }
+        .opt.selected .opt-letter { background: #378ADD; border-color: #378ADD; color: white; }
+        .opt.correct  .opt-letter { background: #639922; border-color: #639922; color: white; }
+        .opt.wrong    .opt-letter { background: #E24B4A; border-color: #E24B4A; color: white; }
+        .opt.missed   .opt-letter { background: #639922; border-color: #639922; color: white; }
+
+        .opt-text { font-size: 14px; color: #1a1a18; line-height: 1.5; padding-top: 3px; }
+
+        .btn {
+          padding: 9px 22px; border-radius: 8px;
+          border: 0.5px solid rgba(0,0,0,0.18);
+          background: transparent; color: #1a1a18;
+          font-size: 14px; cursor: pointer; font-family: inherit;
+          transition: background 0.15s;
+        }
+        .btn:hover           { background: #f0efeb; }
+        .btn.primary         { background: #378ADD; color: white; border-color: #378ADD; }
+        .btn.primary:hover   { background: #185FA5; }
+        .btn:disabled        { opacity: 0.4; cursor: not-allowed; }
+
+        .explanation {
+          margin-top: 1.25rem; padding: 14px 16px;
+          background: #f5f5f3;
+          border-left: 3px solid #378ADD;
+          border-radius: 0 8px 8px 0;
+          font-size: 14px; color: #5f5e5a; line-height: 1.65;
+        }
+        .explanation strong { color: #1a1a18; }
+
+        .score-card  { text-align: center; padding: 2.5rem 1rem; }
+        .score-big   { font-size: 52px; font-weight: 500; color: #378ADD; line-height: 1; }
+        .score-label { font-size: 14px; color: #73726c; margin-top: 6px; margin-bottom: 0.75rem; }
+        .score-bar-wrap { background: #e8e7e1; border-radius: 8px; height: 8px; max-width: 320px; margin: 0 auto 1.25rem; }
+        .score-bar   { height: 8px; border-radius: 8px; transition: width 0.8s ease; }
+        .score-msg   { font-size: 15px; color: #1a1a18; margin-bottom: 1.75rem; font-weight: 500; }
+
+        @media (prefers-color-scheme: dark) {
+          body          { background: #1c1c1a; color: #d4d2c8; }
+          .card         { background: #252523; border-color: rgba(255,255,255,0.1); }
+          .progress-bar-wrap, .score-bar-wrap { background: #3a3a38; }
+          .q-text, .score-msg, .opt-text, header h1 { color: #d4d2c8; }
+          .opt          { border-color: rgba(255,255,255,0.12); }
+          .opt:hover    { background: #2e2e2c; }
+          .opt.selected { background: #0C447C; border-color: #378ADD; }
+          .opt.correct  { background: #173404; border-color: #639922; }
+          .opt.wrong    { background: #501313; border-color: #E24B4A; }
+          .opt.missed   { background: #173404; border-color: #639922; }
+          .explanation  { background: #2e2e2c; color: #9c9a92; }
+          .explanation strong { color: #d4d2c8; }
+          .btn          { color: #d4d2c8; border-color: rgba(255,255,255,0.15); }
+          .btn:hover    { background: #2e2e2c; }
+          .score-big    { color: #378ADD; }
+          header p, .q-counter, .score-label { color: #9c9a92; }
+          .badge-single { background: #0C447C; color: #85B7EB; }
+          .badge-multi  { background: #633806; color: #FAC775; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>QCM — Amazon VPC</h1>
+        <p>Préparation à la certification AWS SAA-C03 · 10 questions</p>
+    </header>
+    <div class="card">
+        <div id="app"></div>
+    </div>
+</div>
+
+<script>
+    var questions = [
+      {
+        text: "Quelle plage CIDR est obligatoire lors de la création d'un VPC custom sur AWS ?",
+        type: "single",
+        options: ["De /8 à /16", "De /16 à /28", "De /24 à /32", "De /12 à /24"],
+        correct: [1],
+        explanation: "<strong>De /16 à /28</strong> : AWS impose cette contrainte pour les CIDR IPv4. Un /16 donne 65 536 adresses, un /28 seulement 16. En dehors de cette plage, la création du VPC est refusée."
+      },
+      {
+        text: "Quelles plages d'adresses IP appartiennent aux plages privées RFC 1918 ? (Sélectionnez toutes les réponses correctes)",
+        type: "multi",
+        options: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "203.0.113.0/24"],
+        correct: [0, 1, 2],
+        explanation: "<strong>10.0.0.0/8, 172.16.0.0/12 et 192.168.0.0/16</strong> sont les trois plages RFC 1918. La plage 203.0.113.0/24 est une adresse publique réservée à la documentation (TEST-NET-3)."
+      },
+      {
+        text: "Combien d'adresses IP sont disponibles dans un CIDR /24 ?",
+        type: "single",
+        options: ["16", "256", "4 096", "65 536"],
+        correct: [1],
+        explanation: "<strong>256 adresses</strong> : formule 2^(32−24) = 2^8 = 256. Attention : AWS réserve 5 adresses par subnet, donc en pratique 251 utilisables dans un subnet /24."
+      },
+      {
+        text: "Quelles ressources sont créées automatiquement lors de la création d'un VPC custom ? (Sélectionnez toutes les réponses correctes)",
+        type: "multi",
+        options: ["DHCP option set", "Route table principale", "NACL principale", "Internet Gateway", "Subnet par défaut"],
+        correct: [0, 1, 2],
+        explanation: "<strong>DHCP option set, Route table et NACL</strong> sont les 3 ressources créées automatiquement. L'Internet Gateway et les subnets doivent être créés manuellement — c'est pourquoi un VPC custom n'a pas d'accès Internet par défaut."
+      },
+      {
+        text: "Un VPC AWS est une ressource de quel type ?",
+        type: "single",
+        options: ["Globale (multi-régions)", "Régionale", "Zonale (par AZ)", "Multi-comptes"],
+        correct: [1],
+        explanation: "<strong>Régionale</strong> : un VPC est limité à une seule région AWS. Il ne s'étend pas sur plusieurs régions. Pour couvrir plusieurs régions, il faut créer un VPC dans chacune et les connecter si nécessaire (ex: VPC Peering, Transit Gateway)."
+      },
+      {
+        text: "Quelle est la limite par défaut du nombre de VPCs par région et par compte AWS ?",
+        type: "single",
+        options: ["1", "3", "5", "10"],
+        correct: [2],
+        explanation: "<strong>5 VPCs par région</strong> est la soft limit par défaut. Elle peut être augmentée sur demande auprès d'AWS Support. Si une architecture nécessite plus de 5 VPCs dans une région, c'est aussi le signal de revoir l'architecture du compte."
+      },
+      {
+        text: "Quel est le CIDR du VPC par défaut créé automatiquement par AWS ?",
+        type: "single",
+        options: ["10.0.0.0/16", "192.168.0.0/16", "172.31.0.0/16", "10.0.0.0/24"],
+        correct: [2],
+        explanation: "<strong>172.31.0.0/16</strong> est le CIDR fixe du VPC par défaut. Ce CIDR ne peut pas être modifié. C'est une des raisons pour lesquelles ce VPC ne doit pas être utilisé en production."
+      },
+      {
+        text: "Pourquoi ne faut-il pas utiliser le VPC par défaut en production ? (Sélectionnez toutes les réponses correctes)",
+        type: "multi",
+        options: [
+          "Il est connecté à un Internet Gateway par défaut",
+          "Son CIDR ne peut pas être modifié",
+          "La NACL par défaut autorise tout le trafic entrant et sortant",
+          "Il n'accepte pas les instances EC2"
+        ],
+        correct: [0, 1, 2],
+        explanation: "<strong>Les 3 premières raisons sont correctes</strong> : accès Internet automatique (risque sécurité), CIDR fixe non personnalisable, et NACL ouverte par défaut. Le VPC par défaut accepte parfaitement les instances EC2."
+      },
+      {
+        text: "Quelle option de tenancy est recommandée lors de la création d'un VPC custom pour la majorité des cas d'usage ?",
+        type: "single",
+        options: ["Dedicated", "Default", "Isolated", "Shared"],
+        correct: [1],
+        explanation: "<strong>Default tenancy</strong> est recommandée : les ressources partagent le matériel physique avec d'autres clients AWS (isolation logique assurée). La tenancy Dedicated réserve du matériel physique exclusif — utile pour certaines exigences de conformité, mais significativement plus coûteuse."
+      },
+      {
+        text: "Combien d'adresses IP sont disponibles dans un CIDR /28 ?",
+        type: "single",
+        options: ["4", "8", "16", "32"],
+        correct: [2],
+        explanation: "<strong>16 adresses</strong> : 2^(32−28) = 2^4 = 16. C'est le CIDR le plus petit autorisé pour un VPC AWS. Dans un subnet /28, AWS réserve 5 adresses, donc seulement 11 sont utilisables."
+      }
+    ];
+
+    var state = { current: 0, selected: [], answered: false, score: 0 };
+    var LETTERS = ['A','B','C','D','E'];
+
+    function render() {
+      var app = document.getElementById('app');
+      var s   = state;
+
+      if (s.current >= questions.length) {
+        renderScore(app);
+        return;
+      }
+      renderQuestion(app, s);
+    }
+
+    function renderScore(app) {
+      var pct = Math.round((state.score / questions.length) * 100);
+      var msg, color;
+      if (pct >= 80)      { msg = 'Excellent niveau pour le SAA-C03 !';      color = '#639922'; }
+      else if (pct >= 60) { msg = 'Bon début — quelques révisions à faire.'; color = '#BA7517'; }
+      else                { msg = 'Relis le module VPC avant de continuer.'; color = '#E24B4A'; }
+
+      app.innerHTML =
+        '<div class="score-card">' +
+          '<div class="score-big">' + state.score + '/' + questions.length + '</div>' +
+          '<div class="score-label">Score final</div>' +
+          '<div class="score-bar-wrap">' +
+            '<div class="score-bar" id="sbar" style="width:0%;background:' + color + '"></div>' +
+          '</div>' +
+          '<div class="score-msg">' + msg + '</div>' +
+          '<button class="btn primary" id="btn-restart">Recommencer</button>' +
+        '</div>';
+
+      document.getElementById('btn-restart').addEventListener('click', function() {
+        state = { current: 0, selected: [], answered: false, score: 0 };
+        render();
+      });
+
+      setTimeout(function() {
+        var bar = document.getElementById('sbar');
+        if (bar) bar.style.width = pct + '%';
+      }, 100);
+    }
+
+    function renderQuestion(app, s) {
+      var q        = questions[s.current];
+      var pct      = Math.round((s.current / questions.length) * 100);
+      var canValidate = s.selected.length > 0 && !s.answered;
+      var btnLabel = s.answered
+        ? (s.current === questions.length - 1 ? 'Voir le score' : 'Question suivante →')
+        : 'Valider';
+
+      var optsHtml = '';
+      for (var i = 0; i < q.options.length; i++) {
+        var cls = 'opt';
+        if (s.answered) {
+          var inCorrect  = q.correct.indexOf(i) >= 0;
+          var inSelected = s.selected.indexOf(i) >= 0;
+          if (inCorrect && inSelected)   cls += ' correct';
+          else if (!inCorrect && inSelected) cls += ' wrong';
+          else if (inCorrect && !inSelected) cls += ' missed';
+        } else {
+          if (s.selected.indexOf(i) >= 0) cls += ' selected';
+        }
+        optsHtml +=
+          '<div class="' + cls + '" data-i="' + i + '">' +
+            '<div class="opt-letter">' + LETTERS[i] + '</div>' +
+            '<div class="opt-text">'   + q.options[i] + '</div>' +
+          '</div>';
+      }
+
+      var expHtml = s.answered
+        ? '<div class="explanation">' + q.explanation + '</div>'
+        : '';
+
+      var badgeCls   = q.type === 'single' ? 'badge-single' : 'badge-multi';
+      var badgeLabel = q.type === 'single' ? 'Réponse unique' : 'Réponses multiples';
+
+      app.innerHTML =
+        '<div class="q-counter">Question ' + (s.current + 1) + ' sur ' + questions.length + '</div>' +
+        '<div class="progress-bar-wrap"><div class="progress-bar" style="width:' + pct + '%"></div></div>' +
+        '<span class="q-type-badge ' + badgeCls + '">' + badgeLabel + '</span>' +
+        '<div class="q-text">' + q.text + '</div>' +
+        '<div class="options" id="opts-list">' + optsHtml + '</div>' +
+        expHtml +
+        '<div style="display:flex;gap:10px;margin-top:1rem">' +
+          '<button class="btn primary" id="btn-main"' + (canValidate ? '' : ' disabled') + '>' + btnLabel + '</button>' +
+        '</div>';
+
+      /* Attacher les events via addEventListener — zéro inline onclick */
+      var optEls = document.querySelectorAll('#opts-list .opt');
+      for (var j = 0; j < optEls.length; j++) {
+        (function(el, idx) {
+          el.addEventListener('click', function() {
+            if (state.answered) return;
+            var q2 = questions[state.current];
+            if (q2.type === 'single') {
+              state.selected = [idx];
+            } else {
+              var pos = state.selected.indexOf(idx);
+              if (pos >= 0) state.selected.splice(pos, 1);
+              else state.selected.push(idx);
+            }
+            render();
+          });
+        })(optEls[j], j);
+      }
+
+      document.getElementById('btn-main').addEventListener('click', function() {
+        if (!state.answered) {
+          /* Valider */
+          state.answered = true;
+          var q3 = questions[state.current];
+          var ok = q3.correct.length === state.selected.length;
+          if (ok) {
+            for (var k = 0; k < q3.correct.length; k++) {
+              if (state.selected.indexOf(q3.correct[k]) < 0) { ok = false; break; }
+            }
+          }
+          if (ok) state.score++;
+          render();
+        } else {
+          /* Suivant */
+          state.current++;
+          state.selected = [];
+          state.answered = false;
+          render();
+        }
+      });
+    }
+
+    render();
+</script>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM AWS SAA-C03 — VPC Essentials</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #f5f5f3;
+          --card: #ffffff;
+          --border: #e2e2de;
+          --blue: #378ADD;
+          --blue-dark: #2468b8;
+          --green: #22c55e;
+          --green-light: #dcfce7;
+          --green-border: #86efac;
+          --red: #ef4444;
+          --red-light: #fee2e2;
+          --red-border: #fca5a5;
+          --yellow: #f59e0b;
+          --text: #1a1a18;
+          --muted: #6b6b68;
+          --mono: 'IBM Plex Mono', monospace;
+          --sans: 'Sora', system-ui, sans-serif;
+        }
+
+        body {
+          font-family: var(--sans);
+          background: var(--bg);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 40px 16px 60px;
+          color: var(--text);
+        }
+
+        /* Header */
+        .header {
+          width: 100%;
+          max-width: 720px;
+          margin-bottom: 28px;
+        }
+        .header-tag {
+          font-family: var(--mono);
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--blue);
+          background: #e8f0fb;
+          border: 1px solid #c3d9f5;
+          border-radius: 4px;
+          padding: 3px 8px;
+          display: inline-block;
+          margin-bottom: 10px;
+        }
+        .header h1 {
+          font-size: 26px;
+          font-weight: 700;
+          line-height: 1.2;
+          letter-spacing: -0.02em;
+        }
+        .header p {
+          margin-top: 6px;
+          font-size: 14px;
+          color: var(--muted);
+          font-weight: 300;
+        }
+
+        /* Progress bar */
+        .progress-wrap {
+          width: 100%;
+          max-width: 720px;
+          margin-bottom: 24px;
+        }
+        .progress-meta {
+          display: flex;
+          justify-content: space-between;
+          font-size: 12px;
+          font-family: var(--mono);
+          color: var(--muted);
+          margin-bottom: 6px;
+        }
+        .progress-track {
+          width: 100%;
+          height: 6px;
+          background: var(--border);
+          border-radius: 99px;
+          overflow: hidden;
+        }
+        .progress-fill {
+          height: 100%;
+          background: var(--blue);
+          border-radius: 99px;
+          transition: width 0.4s cubic-bezier(.4,0,.2,1);
+        }
+
+        /* Card */
+        .card {
+          width: 100%;
+          max-width: 720px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .q-meta {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 18px;
+        }
+        .q-num {
+          font-family: var(--mono);
+          font-size: 12px;
+          color: var(--muted);
+        }
+        .badge {
+          font-family: var(--mono);
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 3px 8px;
+          border-radius: 4px;
+          border: 1px solid;
+        }
+        .badge-single { color: #7c3aed; background: #f5f3ff; border-color: #c4b5fd; }
+        .badge-multi  { color: #b45309; background: #fffbeb; border-color: #fcd34d; }
+
+        .question-text {
+          font-size: 17px;
+          font-weight: 600;
+          line-height: 1.55;
+          margin-bottom: 24px;
+          letter-spacing: -0.01em;
+        }
+
+        /* Options */
+        .options { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 13px 16px;
+          border: 1.5px solid var(--border);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+          background: #fafaf9;
+          user-select: none;
+        }
+        .option:hover:not(.disabled) {
+          border-color: var(--blue);
+          background: #f0f6ff;
+          box-shadow: 0 0 0 3px rgba(55,138,221,0.08);
+        }
+        .option.selected:not(.disabled) {
+          border-color: var(--blue);
+          background: #e8f0fb;
+          box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
+        }
+        .option.correct {
+          border-color: var(--green);
+          background: var(--green-light);
+        }
+        .option.wrong {
+          border-color: var(--red);
+          background: var(--red-light);
+        }
+        .option.missed {
+          border-color: var(--green);
+          background: #f0fdf4;
+          border-style: dashed;
+        }
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+          flex-shrink: 0;
+          width: 26px;
+          height: 26px;
+          border-radius: 6px;
+          background: var(--border);
+          border: 1px solid #d4d4d0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: var(--mono);
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--muted);
+          transition: background 0.15s, color 0.15s;
+        }
+        .option.selected .opt-letter { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .option.correct .opt-letter  { background: var(--green); color: #fff; border-color: var(--green); }
+        .option.wrong .opt-letter    { background: var(--red);   color: #fff; border-color: var(--red); }
+        .option.missed .opt-letter   { background: var(--green); color: #fff; border-color: var(--green); }
+
+        .opt-text {
+          font-size: 14px;
+          line-height: 1.5;
+          padding-top: 2px;
+        }
+
+        /* Explanation */
+        .explanation {
+          display: none;
+          margin-top: 20px;
+          padding: 16px 18px;
+          background: #f8f8f6;
+          border: 1px solid var(--border);
+          border-left: 3px solid var(--blue);
+          border-radius: 0 8px 8px 0;
+          font-size: 13.5px;
+          line-height: 1.65;
+          color: #2d2d2b;
+        }
+        .explanation strong { color: var(--blue); }
+        .explanation.show { display: block; }
+
+        /* Actions */
+        .actions {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 24px;
+          gap: 12px;
+        }
+        .btn {
+          font-family: var(--sans);
+          font-size: 14px;
+          font-weight: 600;
+          padding: 10px 22px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          transition: opacity 0.15s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary {
+          background: var(--blue);
+          color: #fff;
+        }
+        .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+        .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+        .btn-ghost {
+          background: transparent;
+          color: var(--muted);
+          border: 1.5px solid var(--border);
+        }
+        .btn-ghost:hover { border-color: #aaa; color: var(--text); }
+
+        /* Score screen */
+        .score-screen { display: none; text-align: center; }
+        .score-screen.show { display: block; }
+        .score-big {
+          font-size: 64px;
+          font-weight: 700;
+          letter-spacing: -0.04em;
+          line-height: 1;
+          margin: 8px 0 4px;
+        }
+        .score-label {
+          font-size: 14px;
+          color: var(--muted);
+          font-family: var(--mono);
+          margin-bottom: 20px;
+        }
+        .score-bar-track {
+          width: 100%;
+          height: 10px;
+          background: var(--border);
+          border-radius: 99px;
+          overflow: hidden;
+          margin-bottom: 24px;
+        }
+        .score-bar-fill {
+          height: 100%;
+          border-radius: 99px;
+          transition: width 0.8s cubic-bezier(.4,0,.2,1) 0.3s;
+        }
+        .score-message {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        .score-sub {
+          font-size: 13px;
+          color: var(--muted);
+          margin-bottom: 28px;
+          line-height: 1.6;
+        }
+
+        code {
+          font-family: var(--mono);
+          font-size: 12px;
+          background: #f0f0ee;
+          border: 1px solid var(--border);
+          padding: 1px 5px;
+          border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span class="header-tag">AWS SAA-C03</span>
+    <h1>VPC Essentials — QCM</h1>
+    <p>Internet Gateways · Subnets · Route Tables · NACLs · Security Groups · DHCP</p>
+</div>
+
+<div class="progress-wrap" id="progressWrap">
+    <div class="progress-meta">
+        <span id="progressLabel">Question 1 / 15</span>
+        <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="card" id="quizCard">
+    <!-- Question injected here -->
+    <div id="qContent"></div>
+    <div class="actions" id="actions">
+        <button class="btn btn-primary" id="btnValidate" onclick="valider()">Valider</button>
+        <button class="btn btn-primary" id="btnNext" onclick="suivante()" style="display:none">Question suivante →</button>
+    </div>
+</div>
+
+<div class="card score-screen" id="scoreScreen">
+    <div class="header-tag" style="margin-bottom:12px">Résultat final</div>
+    <div class="score-big" id="scoreBig"></div>
+    <div class="score-label" id="scoreLabel"></div>
+    <div class="score-bar-track"><div class="score-bar-fill" id="scoreBarFill"></div></div>
+    <div class="score-message" id="scoreMsg"></div>
+    <div class="score-sub" id="scoreSub"></div>
+    <button class="btn btn-primary" onclick="recommencer()" style="width:100%;padding:13px">↺ Recommencer le QCM</button>
+</div>
+
+<script>
+    var questions = [
+      {
+        q: "Quelles sont les deux conditions OBLIGATOIRES pour qu'une instance EC2 dans un subnet puisse accéder directement à Internet via un Internet Gateway ?",
+        type: "multi",
+        opts: [
+          "La route table du subnet doit contenir une entrée vers l'Internet Gateway",
+          "L'instance doit posséder une adresse IP publique (ou Elastic IP)",
+          "Le DHCP option set doit pointer vers un DNS public comme 8.8.8.8",
+          "Un NAT Gateway doit être présent dans le même subnet",
+          "Le Security Group de l'instance doit autoriser le trafic outbound vers 0.0.0.0/0"
+        ],
+        correct: [0,1],
+        expl: "<strong>Les deux conditions indispensables :</strong> (1) la route table doit avoir une route <code>0.0.0.0/0 → IGW</code>, et (2) l'instance doit avoir une IP publique résolvable. Sans IP publique, l'IGW n'a aucune adresse vers laquelle traduire le trafic. Le DHCP, NAT Gateway ou règles Security Group ne sont pas requis pour l'accès IGW direct."
+      },
+      {
+        q: "Une entreprise souhaite modifier les serveurs DNS d'un VPC existant. Le DHCP option set actuel pointe vers les serveurs DNS Amazon. Quelle est la procédure correcte ?",
+        type: "single",
+        opts: [
+          "Modifier directement le DHCP option set existant via la console AWS",
+          "Créer un nouvel option set avec les nouveaux DNS, puis l'associer au VPC",
+          "Redémarrer toutes les instances EC2 — elles récupèreront automatiquement les nouveaux paramètres",
+          "Désassocier l'IGW, modifier le DHCP, puis réassocier l'IGW",
+          "Créer un nouveau VPC avec les paramètres DHCP souhaités et migrer les ressources"
+        ],
+        correct: [1],
+        expl: "<strong>Les DHCP option sets sont immutables</strong> — ils ne peuvent jamais être modifiés après création. La procédure correcte est : créer un <em>nouvel</em> option set avec les paramètres souhaités, puis l'associer au VPC (l'ancien est remplacé). Attention : les instances existantes peuvent nécessiter un renouvellement de bail DHCP pour appliquer les nouveaux paramètres."
+      },
+      {
+        q: "Un subnet utilise le bloc CIDR 10.0.2.0/26. Combien d'adresses IP sont utilisables pour héberger des instances EC2 ?",
+        type: "single",
+        opts: [
+          "62",
+          "59",
+          "64",
+          "58",
+          "61"
+        ],
+        correct: [1],
+        expl: "<strong>Calcul :</strong> /26 = 2^(32-26) = 64 adresses au total. AWS réserve systématiquement <strong>5 adresses</strong> par subnet (réseau, routeur VPC, DNS Amazon, usage futur, broadcast). 64 − 5 = <strong>59 IPs utilisables</strong>."
+      },
+      {
+        q: "Dans une architecture multi-tiers, un Security Group du Tier 2 (Application) doit uniquement accepter le trafic TCP port 8080 en provenance du Tier 1 (Web). Quelle est la bonne pratique pour définir la source de cette règle inbound ?",
+        type: "single",
+        opts: [
+          "Source : 0.0.0.0/0 (tout Internet) pour simplifier la configuration",
+          "Source : le CIDR du subnet public (ex. 10.0.1.0/24)",
+          "Source : l'ID du Security Group associé aux instances du Tier 1",
+          "Source : l'adresse IP publique du Load Balancer du Tier 1",
+          "Source : le CIDR du VPC entier (ex. 10.0.0.0/16)"
+        ],
+        correct: [2],
+        expl: "<strong>Référencer le Security Group ID</strong> du Tier 1 comme source est la best practice. Cette approche est dynamique (s'adapte automatiquement si des IPs changent), maintenable (pas de mise à jour manuelle des CIDR) et précise (seules les instances avec ce SG sont autorisées, quelle que soit leur IP)."
+      },
+      {
+        q: "Quelles affirmations concernant les NACLs (Network Access Control Lists) sont CORRECTES ? (Sélectionnez toutes les réponses exactes)",
+        type: "multi",
+        opts: [
+          "Une NACL custom refuse tout le trafic par défaut jusqu'à ce que des règles allow soient ajoutées",
+          "Une NACL est stateful — autoriser le trafic entrant autorise automatiquement la réponse sortante",
+          "La première règle correspondante (numéro le plus bas) est appliquée et le traitement s'arrête",
+          "Un subnet peut être associé à plusieurs NACLs simultanément",
+          "Les NACLs ne peuvent pas filtrer le trafic DNS fourni par Amazon"
+        ],
+        correct: [0,2,4],
+        expl: "<strong>Affirmations correctes :</strong><br>• Une NACL custom <em>refuse tout par défaut</em> (contrairement à la NACL par défaut qui autorise tout).<br>• Les NACLs sont <em>stateless</em> (pas stateful) — les règles inbound ET outbound doivent être définies séparément.<br>• La règle au numéro le plus bas correspondante est appliquée en premier.<br>• Un subnet ne peut avoir qu'<em>une seule</em> NACL à la fois.<br>• Les NACLs ne filtrent pas le DNS Amazon, DHCP, métadonnées EC2 ni les IPs réservées VPC."
+      },
+      {
+        q: "Un serveur web EC2 dans un subnet public reçoit des requêtes HTTP (port 80) depuis Internet. Une NACL custom est associée au subnet. Quelles règles sont nécessaires pour que les réponses parviennent aux clients ?",
+        type: "multi",
+        opts: [
+          "Règle inbound : TCP port 80 depuis 0.0.0.0/0 — Allow",
+          "Règle outbound : TCP port 80 vers 0.0.0.0/0 — Allow",
+          "Règle outbound : TCP ports 1024–65535 vers 0.0.0.0/0 — Allow",
+          "Règle inbound : TCP ports 1024–65535 depuis 0.0.0.0/0 — Allow",
+          "Aucune règle outbound n'est nécessaire car la NACL est stateful"
+        ],
+        correct: [0,2],
+        expl: "<strong>La NACL est stateless :</strong> les règles inbound et outbound sont indépendantes. Pour le trafic HTTP entrant, il faut : (1) une règle inbound TCP port 80 pour recevoir la requête, et (2) une règle outbound TCP <strong>ports éphémères 1024–65535</strong> pour envoyer la réponse — le client utilise un port source aléatoire dans cette plage. Une règle outbound port 80 serait incorrecte car ce n'est pas le port de réponse."
+      },
+      {
+        q: "Quelle est la différence fondamentale entre la 'main route table' et une 'custom route table' dans un VPC ?",
+        type: "single",
+        opts: [
+          "La main route table supporte IPv6, les custom tables ne supportent qu'IPv4",
+          "La main route table est appliquée automatiquement aux subnets sans association explicite ; les custom tables sont associées manuellement",
+          "La main route table peut être supprimée à tout moment ; les custom tables sont permanentes",
+          "La main route table ne peut pas contenir de route vers un Internet Gateway",
+          "Les custom tables sont répliquées entre AZs, pas la main route table"
+        ],
+        correct: [1],
+        expl: "<strong>Distinction clé :</strong> la <em>main route table</em> est créée automatiquement avec le VPC et s'applique par défaut à tout subnet sans association explicite. Les <em>custom route tables</em> sont créées manuellement et associées explicitement aux subnets souhaités. En production, il est recommandé d'associer explicitement une custom route table à chaque subnet (relation 1:1) plutôt de s'appuyer sur la main route table."
+      },
+      {
+        q: "Un architecte conçoit un VPC multi-AZ pour une application à 3 tiers. Quel est le nombre MINIMUM de subnets recommandé pour déployer l'application avec haute disponibilité sur 2 AZs ?",
+        type: "single",
+        opts: [
+          "3 subnets (un par tier)",
+          "4 subnets (2 publics + 2 privés)",
+          "6 subnets (3 tiers × 2 AZs)",
+          "2 subnets (1 public + 1 privé)",
+          "8 subnets (3 tiers × 2 AZs + 2 de secours)"
+        ],
+        correct: [2],
+        expl: "<strong>Architecture 3 tiers × 2 AZs = 6 subnets minimum :</strong><br>• AZ-A : Subnet public (Tier 1) + Subnet privé app (Tier 2) + Subnet privé DB (Tier 3)<br>• AZ-B : idem<br>Chaque subnet est lié à <em>une seule AZ</em>. Pour la haute disponibilité, chaque tier doit être présent dans chaque AZ. C'est la best practice AWS pour les applications de production."
+      },
+      {
+        q: "Quelles affirmations concernant les Internet Gateways (IGW) sont VRAIES ?",
+        type: "multi",
+        opts: [
+          "Un IGW peut être attaché à plusieurs VPCs simultanément pour partager la connectivité Internet",
+          "Un IGW est hautement disponible et redondant par conception — aucune configuration de HA n'est nécessaire",
+          "Dans un VPC par défaut, l'IGW est créé et attaché automatiquement",
+          "Un IGW doit être créé dans chaque AZ pour assurer la haute disponibilité",
+          "Un IGW supporte IPv4 et IPv6"
+        ],
+        correct: [1,2,4],
+        expl: "<strong>Affirmations vraies :</strong><br>• L'IGW est nativement HA et redondant au niveau régional — pas de configuration supplémentaire.<br>• Dans le VPC par défaut, AWS crée et attache l'IGW automatiquement.<br>• L'IGW supporte IPv4 et IPv6.<br><br><strong>Faux :</strong> Un IGW ne peut être attaché qu'à <em>un seul VPC à la fois</em>. Il n'est pas créé par AZ — il est un composant régional."
+      },
+      {
+        q: "Une instance EC2 dans un subnet privé (sans route vers un IGW) tente de pinger une instance dans un subnet public du même VPC. Quel sera le résultat ?",
+        type: "single",
+        opts: [
+          "Échec — les instances dans des subnets différents ne peuvent pas communiquer sans passerelle",
+          "Succès — les instances du même VPC communiquent via la local route, indépendamment du type de subnet",
+          "Succès uniquement si une peering connection est établie entre les subnets",
+          "Échec — le trafic ICMP (ping) est bloqué par défaut entre subnets",
+          "Succès uniquement si un Transit Gateway est configuré"
+        ],
+        correct: [1],
+        expl: "<strong>La local route permet la communication intra-VPC :</strong> toute route table contient une règle locale non supprimable (ex. <code>10.0.0.0/16 → local</code>) qui gère le trafic entre tous les subnets du VPC. Les instances du même VPC peuvent se contacter via leurs IPs privées, qu'elles soient dans un subnet public ou privé. Aucun IGW, peering ou Transit Gateway n'est nécessaire pour la communication interne."
+      },
+      {
+        q: "Un développeur constate que malgré une règle inbound HTTP (port 80) dans le Security Group de son instance, les requêtes depuis Internet échouent. Le subnet est public. Quelles pourraient être les causes ? (Sélectionnez toutes les réponses valides)",
+        type: "multi",
+        opts: [
+          "La NACL du subnet ne contient pas de règle inbound allow pour le port 80",
+          "La NACL du subnet ne contient pas de règle outbound allow pour les ports éphémères (1024–65535)",
+          "Le Security Group ne contient pas de règle outbound — les réponses sont bloquées",
+          "L'instance n'a pas d'adresse IP publique assignée",
+          "La route table du subnet ne contient pas de route vers l'Internet Gateway"
+        ],
+        correct: [0,1,3,4],
+        expl: "<strong>Causes possibles (hors Security Group) :</strong><br>• NACL manquante inbound port 80 (stateless → règles indépendantes).<br>• NACL manquante outbound ports éphémères (nécessaire pour les réponses).<br>• Pas d'IP publique sur l'instance (condition obligatoire pour l'accès via IGW).<br>• Pas de route IGW dans la route table (le subnet n'est pas réellement public).<br><br><strong>Incorrect :</strong> Les Security Groups sont <em>stateful</em> — une règle inbound allow autorise automatiquement la réponse outbound."
+      },
+      {
+        q: "Concernant l'association entre subnets et DHCP option sets, quelle affirmation est correcte ?",
+        type: "single",
+        opts: [
+          "Chaque subnet peut avoir son propre DHCP option set indépendant",
+          "Un DHCP option set est associé au niveau du VPC — tous les subnets du VPC utilisent le même",
+          "Un VPC peut avoir plusieurs DHCP option sets actifs simultanément, un par AZ",
+          "Les DHCP option sets ne s'appliquent qu'aux instances lancées après leur association",
+          "Un subnet peut hériter du DHCP option set de la région ou utiliser un custom set"
+        ],
+        correct: [1],
+        expl: "<strong>Le DHCP option set est associé au niveau VPC :</strong> un VPC ne peut avoir qu'<em>un seul</em> DHCP option set à la fois. Tous les subnets du VPC utilisent automatiquement cet option set — il n'est pas configurable par subnet. Les nouvelles instances reçoivent les paramètres lors du démarrage ; les instances existantes peuvent nécessiter un renouvellement de bail DHCP."
+      },
+      {
+        q: "Dans une architecture 3 tiers, comment le trafic entre le Tier 2 (Application) et le Tier 3 (Base de données) est-il contrôlé de façon granulaire au niveau des instances ?",
+        type: "single",
+        opts: [
+          "Via des NACLs avec des règles basées sur les ports et les plages IP des subnets",
+          "Via les Security Groups en référençant le SG ID du Tier 2 comme source dans les règles inbound du Tier 3",
+          "Via des routes spécifiques dans les route tables privées",
+          "Via AWS WAF configuré entre les tiers",
+          "Via des VPC endpoints privés entre chaque tier"
+        ],
+        correct: [1],
+        expl: "<strong>Security Groups avec référence SG ID :</strong> la best practice est de définir dans le SG du Tier 3 (DB) une règle inbound qui autorise uniquement le trafic provenant du SG ID du Tier 2 (App). Cela assure que seules les instances app (et non des IPs arbitraires) peuvent atteindre la base de données, même si les IPs changent. Les NACLs offrent un filtrage moins granulaire et difficile à maintenir pour des architectures dynamiques."
+      },
+      {
+        q: "Un administrateur souhaite bloquer une IP spécifique (203.0.113.50) qui attaque son infrastructure, tout en continuant d'autoriser le trafic HTTP global. La NACL du subnet public contient déjà la règle 100 (allow TCP 80). Comment procéder ?",
+        type: "single",
+        opts: [
+          "Modifier la règle 100 pour exclure l'IP 203.0.113.50 avec une condition NOT",
+          "Ajouter une règle deny avec un numéro INFÉRIEUR à 100 (ex. 90) ciblant l'IP 203.0.113.50",
+          "Ajouter une règle deny avec un numéro SUPÉRIEUR à 100 (ex. 110) ciblant l'IP 203.0.113.50",
+          "Bloquer l'IP dans le Security Group en ajoutant une règle deny pour cette IP",
+          "Créer une nouvelle NACL avec uniquement la règle de blocage et l'associer au subnet"
+        ],
+        correct: [1],
+        expl: "<strong>L'ordre des règles NACL est critique :</strong> la première règle correspondante gagne et le traitement s'arrête. Pour bloquer une IP spécifique avant d'autoriser le trafic général, il faut ajouter une règle deny avec un numéro <em>inférieur</em> à 100 (ex. règle 90 : deny TCP 80 depuis 203.0.113.50). La règle 90 sera évaluée en premier, bloquant l'IP. Les autres requêtes atteignent la règle 100 (allow). Note : les Security Groups ne supportent pas les règles deny — impossible via SG."
+      },
+      {
+        q: "Quelles ressources AWS sont créées AUTOMATIQUEMENT lorsqu'un nouveau VPC personnalisé (non défaut) est créé ? (Sélectionnez toutes les réponses exactes)",
+        type: "multi",
+        opts: [
+          "Une main route table",
+          "Un Internet Gateway attaché au VPC",
+          "Un NACL par défaut",
+          "Un Security Group par défaut",
+          "Des subnets dans chaque AZ disponible de la région"
+        ],
+        correct: [0,2,3],
+        expl: "<strong>Création automatique avec un VPC custom :</strong><br>• ✅ Main route table (avec la local route uniquement)<br>• ✅ NACL par défaut (autorise tout le trafic)<br>• ✅ Security Group par défaut<br><br><strong>Non créés automatiquement :</strong><br>• ❌ Internet Gateway — doit être créé <em>et</em> attaché manuellement pour un VPC custom.<br>• ❌ Subnets — aucun subnet n'est créé par défaut dans un VPC custom (contrairement au VPC par défaut)."
+      }
+    ];
+
+    var qIdx = 0;
+    var selected = [];
+    var answered = false;
+    var score = 0;
+
+    function paint() {
+      var q = questions[qIdx];
+      var letters = ['A','B','C','D','E'];
+      var html = '';
+      html += '<div class="q-meta">';
+      html += '<span class="q-num">Q' + (qIdx+1) + ' / ' + questions.length + '</span>';
+      if (q.type === 'single') {
+        html += '<span class="badge badge-single">Réponse unique</span>';
+      } else {
+        html += '<span class="badge badge-multi">Réponses multiples</span>';
+      }
+      html += '</div>';
+      html += '<div class="question-text">' + q.q + '</div>';
+      html += '<div class="options" id="opts">';
+      for (var i = 0; i < q.opts.length; i++) {
+        html += '<div class="option" id="opt' + i + '" onclick="pickOption(' + i + ')">';
+        html += '<div class="opt-letter">' + letters[i] + '</div>';
+        html += '<div class="opt-text">' + q.opts[i] + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+      html += '<div class="explanation" id="expl">' + q.expl + '</div>';
+      document.getElementById('qContent').innerHTML = html;
+      document.getElementById('btnValidate').style.display = 'inline-block';
+      document.getElementById('btnValidate').disabled = true;
+      document.getElementById('btnNext').style.display = 'none';
+      paintProgress();
+    }
+
+    function paintProgress() {
+      var pct = Math.round((qIdx / questions.length) * 100);
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressLabel').textContent = 'Question ' + (qIdx+1) + ' / ' + questions.length;
+      document.getElementById('progressPct').textContent = pct + '%';
+    }
+
+    function pickOption(i) {
+      if (answered) return;
+      var q = questions[qIdx];
+      if (q.type === 'single') {
+        selected = [i];
+        for (var j = 0; j < q.opts.length; j++) {
+          var el = document.getElementById('opt' + j);
+          el.classList.remove('selected');
+        }
+        document.getElementById('opt' + i).classList.add('selected');
+      } else {
+        var idx = selected.indexOf(i);
+        if (idx === -1) {
+          selected.push(i);
+          document.getElementById('opt' + i).classList.add('selected');
+        } else {
+          selected.splice(idx, 1);
+          document.getElementById('opt' + i).classList.remove('selected');
+        }
+      }
+      document.getElementById('btnValidate').disabled = (selected.length === 0);
+    }
+
+    function valider() {
+      if (answered || selected.length === 0) return;
+      answered = true;
+      var q = questions[qIdx];
+      var correct = q.correct;
+      var isCorrect = true;
+
+      if (selected.length !== correct.length) {
+        isCorrect = false;
+      } else {
+        for (var i = 0; i < correct.length; i++) {
+          if (selected.indexOf(correct[i]) === -1) { isCorrect = false; break; }
+        }
+      }
+
+      if (isCorrect) score++;
+
+      for (var j = 0; j < q.opts.length; j++) {
+        var el = document.getElementById('opt' + j);
+        el.classList.remove('selected');
+        el.classList.add('disabled');
+        el.onclick = null;
+
+        var inSelected = selected.indexOf(j) !== -1;
+        var inCorrect = correct.indexOf(j) !== -1;
+
+        if (inSelected && inCorrect) {
+          el.classList.add('correct');
+        } else if (inSelected && !inCorrect) {
+          el.classList.add('wrong');
+        } else if (!inSelected && inCorrect) {
+          el.classList.add('missed');
+        }
+      }
+
+      document.getElementById('expl').classList.add('show');
+      document.getElementById('btnValidate').style.display = 'none';
+      document.getElementById('btnNext').style.display = 'inline-block';
+      document.getElementById('btnNext').textContent = qIdx < questions.length - 1 ? 'Question suivante →' : 'Voir le score →';
+    }
+
+    function suivante() {
+      qIdx++;
+      selected = [];
+      answered = false;
+      if (qIdx >= questions.length) {
+        paintScore();
+        return;
+      }
+      paint();
+    }
+
+    function paintScore() {
+      document.getElementById('quizCard').style.display = 'none';
+      document.getElementById('progressWrap').style.display = 'none';
+      var ss = document.getElementById('scoreScreen');
+      ss.classList.add('show');
+      var pct = Math.round((score / questions.length) * 100);
+      document.getElementById('scoreBig').textContent = score + ' / ' + questions.length;
+      document.getElementById('scoreLabel').textContent = pct + '% de réussite';
+
+      var fill = document.getElementById('scoreBarFill');
+      var color = pct >= 80 ? '#22c55e' : pct >= 60 ? '#f59e0b' : '#ef4444';
+      fill.style.background = color;
+      setTimeout(function() { fill.style.width = pct + '%'; }, 50);
+
+      var msg, sub;
+      if (pct >= 80) {
+        msg = '🎯 Excellent niveau — Prêt pour la SAA-C03';
+        sub = 'Vous maîtrisez les concepts VPC fondamentaux. Continuez sur les autres domaines (S3, IAM, ELB...) pour consolider votre préparation.';
+      } else if (pct >= 60) {
+        msg = '📚 Bon niveau — Quelques points à consolider';
+        sub = 'Revoyez en priorité les NACLs (stateless/ports éphémères) et les conditions d\'accès Internet via IGW. Ces sujets sont fréquents à l\'examen.';
+      } else {
+        msg = '🔄 Des bases à renforcer';
+        sub = 'Relisez attentivement les sections sur NACLs vs Security Groups, les IGW et les route tables. La distinction stateful/stateless est critique pour l\'examen.';
+      }
+      document.getElementById('scoreMsg').textContent = msg;
+      document.getElementById('scoreSub').textContent = sub;
+    }
+
+    function recommencer() {
+      qIdx = 0;
+      selected = [];
+      answered = false;
+      score = 0;
+      document.getElementById('scoreScreen').classList.remove('show');
+      document.getElementById('quizCard').style.display = 'block';
+      document.getElementById('progressWrap').style.display = 'block';
+      paint();
+    }
+
+    // Init
+    paint();
+</script>
+</body>
+</html>

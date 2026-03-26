@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM AWS SAA-C03 — AWS CloudShell</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #f5f5f3;
+          --card: #ffffff;
+          --border: #e2e2de;
+          --blue: #378ADD;
+          --blue-dark: #2468b8;
+          --green: #22c55e;
+          --green-light: #dcfce7;
+          --red: #ef4444;
+          --red-light: #fee2e2;
+          --text: #1a1a18;
+          --muted: #6b6b68;
+          --mono: 'IBM Plex Mono', monospace;
+          --sans: 'Sora', system-ui, sans-serif;
+        }
+
+        body {
+          font-family: var(--sans);
+          background: var(--bg);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 40px 16px 60px;
+          color: var(--text);
+        }
+
+        .header { width: 100%; max-width: 720px; margin-bottom: 28px; }
+        .header-tag {
+          font-family: var(--mono);
+          font-size: 11px; font-weight: 600;
+          letter-spacing: 0.12em; text-transform: uppercase;
+          color: var(--blue); background: #e8f0fb;
+          border: 1px solid #c3d9f5; border-radius: 4px;
+          padding: 3px 8px; display: inline-block; margin-bottom: 10px;
+        }
+        .header h1 { font-size: 26px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+        .header p { margin-top: 6px; font-size: 14px; color: var(--muted); font-weight: 300; }
+
+        .progress-wrap { width: 100%; max-width: 720px; margin-bottom: 24px; }
+        .progress-meta {
+          display: flex; justify-content: space-between;
+          font-size: 12px; font-family: var(--mono); color: var(--muted); margin-bottom: 6px;
+        }
+        .progress-track { width: 100%; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--blue); border-radius: 99px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+
+        .card {
+          width: 100%; max-width: 720px;
+          background: var(--card); border: 1px solid var(--border);
+          border-radius: 12px; padding: 32px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .q-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+        .q-num { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+        .badge {
+          font-family: var(--mono); font-size: 10px; font-weight: 600;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          padding: 3px 8px; border-radius: 4px; border: 1px solid;
+        }
+        .badge-single { color: #7c3aed; background: #f5f3ff; border-color: #c4b5fd; }
+        .badge-multi  { color: #b45309; background: #fffbeb; border-color: #fcd34d; }
+
+        .question-text { font-size: 17px; font-weight: 600; line-height: 1.55; margin-bottom: 24px; letter-spacing: -0.01em; }
+
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option {
+          display: flex; align-items: flex-start; gap: 12px;
+          padding: 13px 16px; border: 1.5px solid var(--border);
+          border-radius: 8px; cursor: pointer;
+          transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+          background: #fafaf9; user-select: none;
+        }
+        .option:hover:not(.disabled) { border-color: var(--blue); background: #f0f6ff; box-shadow: 0 0 0 3px rgba(55,138,221,0.08); }
+        .option.selected:not(.disabled) { border-color: var(--blue); background: #e8f0fb; box-shadow: 0 0 0 3px rgba(55,138,221,0.12); }
+        .option.correct  { border-color: var(--green); background: var(--green-light); }
+        .option.wrong    { border-color: var(--red);   background: var(--red-light); }
+        .option.missed   { border-color: var(--green); background: #f0fdf4; border-style: dashed; }
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+          flex-shrink: 0; width: 26px; height: 26px; border-radius: 6px;
+          background: var(--border); border: 1px solid #d4d4d0;
+          display: flex; align-items: center; justify-content: center;
+          font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--muted);
+          transition: background 0.15s, color 0.15s;
+        }
+        .option.selected .opt-letter { background: var(--blue);  color: #fff; border-color: var(--blue); }
+        .option.correct  .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+        .option.wrong    .opt-letter { background: var(--red);   color: #fff; border-color: var(--red); }
+        .option.missed   .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+
+        .opt-text { font-size: 14px; line-height: 1.5; padding-top: 2px; }
+
+        .explanation {
+          display: none; margin-top: 20px; padding: 16px 18px;
+          background: #f8f8f6; border: 1px solid var(--border);
+          border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0;
+          font-size: 13.5px; line-height: 1.65; color: #2d2d2b;
+        }
+        .explanation strong { color: var(--blue); }
+        .explanation.show { display: block; }
+
+        .actions { display: flex; align-items: center; justify-content: space-between; margin-top: 24px; gap: 12px; }
+        .btn {
+          font-family: var(--sans); font-size: 14px; font-weight: 600;
+          padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer;
+          transition: opacity 0.15s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+        .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+        .score-screen { display: none; text-align: center; }
+        .score-screen.show { display: block; }
+        .score-big { font-size: 64px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin: 8px 0 4px; }
+        .score-label { font-size: 14px; color: var(--muted); font-family: var(--mono); margin-bottom: 20px; }
+        .score-bar-track { width: 100%; height: 10px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 24px; }
+        .score-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(.4,0,.2,1) 0.3s; }
+        .score-message { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .score-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+        code {
+          font-family: var(--mono); font-size: 12px;
+          background: #f0f0ee; border: 1px solid var(--border);
+          padding: 1px 5px; border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span class="header-tag">AWS SAA-C03</span>
+    <h1>AWS CloudShell — QCM</h1>
+    <p>Shell navigateur · Authentification · CLI · Permissions · Scripts Bash</p>
+</div>
+
+<div class="progress-wrap" id="progressWrap">
+    <div class="progress-meta">
+        <span id="progressLabel">Question 1 / 10</span>
+        <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="card" id="quizCard">
+    <div id="qContent"></div>
+    <div class="actions" id="actions">
+        <button class="btn btn-primary" id="btnValidate" onclick="valider()">Valider</button>
+        <button class="btn btn-primary" id="btnNext" onclick="suivante()" style="display:none">Question suivante →</button>
+    </div>
+</div>
+
+<div class="card score-screen" id="scoreScreen">
+    <div class="header-tag" style="margin-bottom:12px">Résultat final</div>
+    <div class="score-big" id="scoreBig"></div>
+    <div class="score-label" id="scoreLabel"></div>
+    <div class="score-bar-track"><div class="score-bar-fill" id="scoreBarFill"></div></div>
+    <div class="score-message" id="scoreMsg"></div>
+    <div class="score-sub" id="scoreSub"></div>
+    <button class="btn btn-primary" onclick="recommencer()" style="width:100%;padding:13px">↺ Recommencer le QCM</button>
+</div>
+
+<script>
+    var questions = [
+      {
+        q: "Un développeur doit exécuter quelques commandes AWS CLI ponctuellement sans configurer d'environnement local. Quelle solution AWS est la plus adaptée ?",
+        type: "single",
+        opts: [
+          "Installer AWS CLI sur sa machine locale et configurer un profil IAM",
+          "Utiliser AWS CloudShell depuis la console — pré-authentifié et prêt à l'emploi sans configuration",
+          "Lancer une instance EC2 temporaire avec le rôle IAM approprié",
+          "Utiliser AWS Systems Manager Session Manager sur une instance existante",
+          "Créer un AWS Lambda pour exécuter les commandes CLI via des événements"
+        ],
+        correct: [1],
+        expl: "<strong>AWS CloudShell est la réponse type à ce scénario.</strong> C'est exactement l'usage prévu : un shell navigateur pré-authentifié, pré-installé, accessible directement depuis la console AWS sans aucune configuration locale. Conseil examen : dès qu'un scénario mentionne une solution <em>rapide, pré-installée et pré-authentifiée</em> pour interagir avec AWS via CLI → répondre CloudShell."
+      },
+      {
+        q: "Comment AWS CloudShell s'authentifie-t-il auprès des services AWS lors de l'exécution de commandes CLI ?",
+        type: "single",
+        opts: [
+          "Il génère automatiquement une nouvelle paire de clés d'accès IAM à chaque session",
+          "Il utilise une authentification anonyme avec des permissions en lecture seule uniquement",
+          "Il hérite automatiquement des credentials de l'identité active dans la session console AWS",
+          "Il nécessite la saisie manuelle d'une Access Key et d'une Secret Key au premier lancement",
+          "Il utilise un rôle IAM dédié 'CloudShellRole' créé automatiquement par AWS"
+        ],
+        correct: [2],
+        expl: "<strong>CloudShell est pré-authentifié via la session console active.</strong> Il hérite des credentials de l'utilisateur IAM ou du rôle assumé connecté à la console. Pas de configuration, pas de clés à saisir. La commande <code>aws sts get-caller-identity</code> permet de vérifier sous quelle identité la session CloudShell s'exécute."
+      },
+      {
+        q: "Un administrateur est connecté à la console AWS avec un utilisateur IAM qui possède uniquement des permissions de lecture (ReadOnly). Il ouvre CloudShell et tente de créer un utilisateur IAM via <code>aws iam create-user</code>. Quel sera le résultat ?",
+        type: "single",
+        opts: [
+          "Succès — CloudShell possède des permissions admin indépendantes de l'utilisateur connecté",
+          "Succès partiel — CloudShell autorise les actions d'écriture sur IAM uniquement",
+          "Échec — CloudShell hérite des permissions de l'identité connectée, donc la création sera refusée faute de droits",
+          "Succès — AWS CloudShell contourne les politiques IAM pour les actions CLI",
+          "Erreur de syntaxe — la commande create-user n'est pas disponible dans CloudShell"
+        ],
+        correct: [2],
+        expl: "<strong>CloudShell n'a pas de permissions propres.</strong> Il exécute les commandes avec exactement les mêmes droits que l'identité connectée à la console. Si l'utilisateur IAM n'a pas la permission <code>iam:CreateUser</code>, la commande échouera avec une erreur <em>AccessDenied</em>. CloudShell ne contourne ni n'élève aucune permission — même périmètre que la console."
+      },
+      {
+        q: "Quelles affirmations sur AWS CloudShell sont CORRECTES ? (Sélectionnez toutes les réponses exactes)",
+        type: "multi",
+        opts: [
+          "CloudShell est accessible directement depuis la barre de navigation de la console AWS",
+          "L'AWS CLI est pré-installée et prête à l'emploi dans CloudShell sans installation manuelle",
+          "CloudShell nécessite la création d'une instance EC2 dédiée dans le compte",
+          "CloudShell s'ouvre dans le contexte de la région sélectionnée dans la console",
+          "CloudShell est uniquement disponible pour les utilisateurs root — pas pour les utilisateurs IAM"
+        ],
+        correct: [0,1,3],
+        expl: "<strong>Affirmations correctes :</strong><br>• ✅ Accessible via le bouton CloudShell dans la barre de navigation de la console.<br>• ✅ AWS CLI pré-installée — aucune configuration requise.<br>• ✅ CloudShell s'ouvre dans la région active de la console.<br><br><strong>Incorrect :</strong><br>• ❌ CloudShell ne crée pas d'instance EC2 — c'est un environnement managé par AWS.<br>• ❌ CloudShell est accessible à tout utilisateur IAM (ou rôle) avec les permissions nécessaires, pas uniquement au root."
+      },
+      {
+        q: "Quelle commande AWS CLI permet de vérifier l'identité sous laquelle CloudShell est authentifié ?",
+        type: "single",
+        opts: [
+          "<code>aws iam get-user</code>",
+          "<code>aws cloudshell get-identity</code>",
+          "<code>aws sts get-caller-identity</code>",
+          "<code>aws configure list</code>",
+          "<code>aws whoami</code>"
+        ],
+        correct: [2],
+        expl: "<strong><code>aws sts get-caller-identity</code></strong> est la commande correcte. Elle retourne l'ARN, l'Account ID et l'UserId de l'identité active utilisée pour l'authentification. C'est la première commande à exécuter pour vérifier sous quelle identité CloudShell opère — notamment utile pour diagnostiquer des erreurs de permission."
+      },
+      {
+        q: "Un ingénieur DevOps souhaite automatiser la création de 5 utilisateurs IAM avec des noms aléatoires depuis CloudShell. Quelle approche est correcte ?",
+        type: "single",
+        opts: [
+          "Impossible — CloudShell ne supporte pas l'exécution de scripts, seulement des commandes isolées",
+          "Écrire un script Bash dans CloudShell (ex. via nano), le rendre exécutable avec chmod +x, puis l'exécuter",
+          "Utiliser uniquement la console AWS car CloudShell ne peut pas créer de ressources IAM",
+          "Uploader le script via S3 puis déclencher son exécution via une fonction Lambda",
+          "CloudShell ne supporte que Python — il faudrait écrire le script en Python uniquement"
+        ],
+        correct: [1],
+        expl: "<strong>CloudShell supporte pleinement les scripts Bash.</strong> Workflow typique : (1) créer le script avec <code>nano script.sh</code>, (2) le rendre exécutable avec <code>chmod +x script.sh</code>, (3) l'exécuter avec <code>./script.sh</code> ou <code>bash script.sh</code>. CloudShell dispose de Bash, Python, et de nombreux outils pré-installés. Les scripts peuvent appeler l'AWS CLI avec les permissions héritées de la session."
+      },
+      {
+        q: "Dans le script de création d'utilisateurs IAM présenté dans le cours, quelle commande génère un nom d'utilisateur aléatoire ?",
+        type: "single",
+        opts: [
+          "<code>aws iam generate-username</code>",
+          "<code>uuidgen | cut -c1-8</code>",
+          "<code>openssl rand -hex 3</code> combiné à un préfixe",
+          "<code>random --string 6</code>",
+          "<code>aws sts get-random-id</code>"
+        ],
+        correct: [2],
+        expl: "<strong><code>openssl rand -hex 3</code></strong> génère une chaîne hexadécimale aléatoire de 3 octets (6 caractères). Dans le script du cours, elle est utilisée comme suit : <code>USERNAME=\"user-$(openssl rand -hex 3)\"</code>, produisant des noms du type <code>user-a3f9c1</code>. OpenSSL est un outil pré-installé dans CloudShell, disponible sans configuration supplémentaire."
+      },
+      {
+        q: "Après avoir créé un script Bash dans CloudShell et voulu l'exécuter, le message 'Permission denied' apparaît. Quelle est la cause la plus probable et la solution ?",
+        type: "single",
+        opts: [
+          "L'utilisateur IAM n'a pas les droits pour exécuter des scripts — ajouter la policy AWSCloudShellFullAccess",
+          "Le script n'est pas exécutable — utiliser <code>chmod +x script.sh</code> pour lui donner les droits d'exécution",
+          "CloudShell bloque l'exécution de scripts par défaut — activer l'option 'Script Execution' dans les paramètres",
+          "Le fichier est corrompu — le recréer avec l'éditeur intégré CloudShell",
+          "Il faut préfixer la commande avec <code>sudo</code> pour exécuter des scripts dans CloudShell"
+        ],
+        correct: [1],
+        expl: "<strong>'Permission denied' = le fichier n'est pas marqué comme exécutable.</strong> Après création d'un script avec <code>nano</code>, il faut lui attribuer les droits d'exécution avec <code>chmod +x script.sh</code>. Ensuite, l'exécuter avec <code>./script.sh</code>. Alternativement, <code>bash script.sh</code> fonctionne sans <code>chmod</code> car on appelle explicitement l'interpréteur Bash."
+      },
+      {
+        q: "Quels sont les avantages d'AWS CloudShell par rapport à une configuration CLI locale ? (Sélectionnez toutes les réponses exactes)",
+        type: "multi",
+        opts: [
+          "Aucune installation ni configuration de l'AWS CLI n'est nécessaire",
+          "Authentification automatique — pas de gestion de clés d'accès locales",
+          "Performances réseau supérieures grâce à la proximité avec les datacenters AWS",
+          "Accessible depuis n'importe quel navigateur sans dépendance à un poste de travail spécifique",
+          "Permet d'exécuter des commandes nécessitant des permissions root sur les services AWS"
+        ],
+        correct: [0,1,3],
+        expl: "<strong>Avantages réels de CloudShell :</strong><br>• ✅ Zéro installation — AWS CLI et outils courants pré-installés.<br>• ✅ Authentification automatique via la session console — pas de clés Access Key/Secret Key à gérer localement.<br>• ✅ Accessible depuis tout navigateur — idéal en déplacement ou sur un poste sans CLI configuré.<br><br><strong>Nuances :</strong><br>• Les performances réseau ne sont pas garanties supérieures pour tout usage.<br>• CloudShell n'octroie pas de permissions 'root AWS' — les droits restent ceux de l'identité IAM active."
+      },
+      {
+        q: "Un scénario d'examen décrit : 'Une équipe a besoin d'une solution permettant d'interagir avec les services AWS via CLI, sans installer de logiciel sur les postes locaux, et qui soit immédiatement disponible après connexion à la console.' Quelle est la réponse correcte ?",
+        type: "single",
+        opts: [
+          "AWS Systems Manager Run Command",
+          "AWS Lambda avec AWS SDK",
+          "AWS CloudShell",
+          "AWS Cloud9",
+          "EC2 Instance Connect"
+        ],
+        correct: [2],
+        expl: "<strong>AWS CloudShell correspond exactement à ce scénario.</strong> Les mots-clés déclencheurs sont : <em>sans installation locale</em> + <em>CLI</em> + <em>immédiatement disponible depuis la console</em>. Cloud9 est un IDE complet (plus que du CLI), Run Command cible des instances EC2 existantes, Lambda exécute du code serverless mais n'est pas un shell interactif, et EC2 Instance Connect connecte à des instances. Seul CloudShell répond à tous les critères simultanément."
+      }
+    ];
+
+    var qIdx = 0;
+    var selected = [];
+    var answered = false;
+    var score = 0;
+
+    function paint() {
+      var q = questions[qIdx];
+      var letters = ['A','B','C','D','E'];
+      var html = '';
+      html += '<div class="q-meta">';
+      html += '<span class="q-num">Q' + (qIdx+1) + ' / ' + questions.length + '</span>';
+      html += q.type === 'single'
+        ? '<span class="badge badge-single">Réponse unique</span>'
+        : '<span class="badge badge-multi">Réponses multiples</span>';
+      html += '</div>';
+      html += '<div class="question-text">' + q.q + '</div>';
+      html += '<div class="options" id="opts">';
+      for (var i = 0; i < q.opts.length; i++) {
+        html += '<div class="option" id="opt' + i + '" onclick="pickOption(' + i + ')">';
+        html += '<div class="opt-letter">' + letters[i] + '</div>';
+        html += '<div class="opt-text">' + q.opts[i] + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+      html += '<div class="explanation" id="expl">' + q.expl + '</div>';
+      document.getElementById('qContent').innerHTML = html;
+      document.getElementById('btnValidate').style.display = 'inline-block';
+      document.getElementById('btnValidate').disabled = true;
+      document.getElementById('btnNext').style.display = 'none';
+      paintProgress();
+    }
+
+    function paintProgress() {
+      var pct = Math.round((qIdx / questions.length) * 100);
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressLabel').textContent = 'Question ' + (qIdx+1) + ' / ' + questions.length;
+      document.getElementById('progressPct').textContent = pct + '%';
+    }
+
+    function pickOption(i) {
+      if (answered) return;
+      var q = questions[qIdx];
+      if (q.type === 'single') {
+        selected = [i];
+        for (var j = 0; j < q.opts.length; j++) document.getElementById('opt' + j).classList.remove('selected');
+        document.getElementById('opt' + i).classList.add('selected');
+      } else {
+        var idx = selected.indexOf(i);
+        if (idx === -1) { selected.push(i); document.getElementById('opt' + i).classList.add('selected'); }
+        else { selected.splice(idx, 1); document.getElementById('opt' + i).classList.remove('selected'); }
+      }
+      document.getElementById('btnValidate').disabled = (selected.length === 0);
+    }
+
+    function valider() {
+      if (answered || selected.length === 0) return;
+      answered = true;
+      var q = questions[qIdx];
+      var correct = q.correct;
+      var isCorrect = selected.length === correct.length;
+      if (isCorrect) {
+        for (var i = 0; i < correct.length; i++) {
+          if (selected.indexOf(correct[i]) === -1) { isCorrect = false; break; }
+        }
+      }
+      if (isCorrect) score++;
+      for (var j = 0; j < q.opts.length; j++) {
+        var el = document.getElementById('opt' + j);
+        el.classList.remove('selected'); el.classList.add('disabled'); el.onclick = null;
+        var inSel = selected.indexOf(j) !== -1;
+        var inCor = correct.indexOf(j) !== -1;
+        if (inSel && inCor)   el.classList.add('correct');
+        else if (inSel)       el.classList.add('wrong');
+        else if (inCor)       el.classList.add('missed');
+      }
+      document.getElementById('expl').classList.add('show');
+      document.getElementById('btnValidate').style.display = 'none';
+      document.getElementById('btnNext').style.display = 'inline-block';
+      document.getElementById('btnNext').textContent = qIdx < questions.length - 1 ? 'Question suivante →' : 'Voir le score →';
+    }
+
+    function suivante() {
+      qIdx++; selected = []; answered = false;
+      if (qIdx >= questions.length) { paintScore(); return; }
+      paint();
+    }
+
+    function paintScore() {
+      document.getElementById('quizCard').style.display = 'none';
+      document.getElementById('progressWrap').style.display = 'none';
+      document.getElementById('scoreScreen').classList.add('show');
+      var pct = Math.round((score / questions.length) * 100);
+      document.getElementById('scoreBig').textContent = score + ' / ' + questions.length;
+      document.getElementById('scoreLabel').textContent = pct + '% de réussite';
+      var fill = document.getElementById('scoreBarFill');
+      fill.style.background = pct >= 80 ? '#22c55e' : pct >= 60 ? '#f59e0b' : '#ef4444';
+      setTimeout(function() { fill.style.width = pct + '%'; }, 50);
+      var msg, sub;
+      if (pct >= 80) {
+        msg = '🎯 Excellent — CloudShell parfaitement maîtrisé';
+        sub = 'Vous savez identifier les scénarios CloudShell à l\'examen et en comprendre les mécanismes d\'authentification. Passez au module suivant.';
+      } else if (pct >= 60) {
+        msg = '📚 Bon niveau — Quelques points à revoir';
+        sub = 'Revoyez notamment l\'héritage des permissions (CloudShell = mêmes droits que l\'identité active) et les mots-clés déclencheurs pour l\'examen.';
+      } else {
+        msg = '🔄 Bases à consolider';
+        sub = 'Relisez les sections sur l\'authentification CloudShell et son positionnement par rapport aux autres services CLI AWS. Le scénario "sans installation locale" est clé.';
+      }
+      document.getElementById('scoreMsg').textContent = msg;
+      document.getElementById('scoreSub').textContent = sub;
+    }
+
+    function recommencer() {
+      qIdx = 0; selected = []; answered = false; score = 0;
+      document.getElementById('scoreScreen').classList.remove('show');
+      document.getElementById('quizCard').style.display = 'block';
+      document.getElementById('progressWrap').style.display = 'block';
+      paint();
+    }
+
+    paint();
+</script>
+</body>
+</html>

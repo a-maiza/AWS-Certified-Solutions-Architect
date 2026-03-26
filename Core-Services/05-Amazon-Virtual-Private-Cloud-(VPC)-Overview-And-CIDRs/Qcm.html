@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM AWS SAA-C03 — Amazon VPC Overview</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #f5f5f3;
+          --card: #ffffff;
+          --border: #e2e2de;
+          --blue: #378ADD;
+          --blue-dark: #2468b8;
+          --green: #22c55e;
+          --green-light: #dcfce7;
+          --red: #ef4444;
+          --red-light: #fee2e2;
+          --text: #1a1a18;
+          --muted: #6b6b68;
+          --mono: 'IBM Plex Mono', monospace;
+          --sans: 'Sora', system-ui, sans-serif;
+        }
+
+        body {
+          font-family: var(--sans);
+          background: var(--bg);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 40px 16px 60px;
+          color: var(--text);
+        }
+
+        .header {
+          width: 100%;
+          max-width: 720px;
+          margin-bottom: 28px;
+        }
+        .header-tag {
+          font-family: var(--mono);
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--blue);
+          background: #e8f0fb;
+          border: 1px solid #c3d9f5;
+          border-radius: 4px;
+          padding: 3px 8px;
+          display: inline-block;
+          margin-bottom: 10px;
+        }
+        .header h1 {
+          font-size: 26px;
+          font-weight: 700;
+          line-height: 1.2;
+          letter-spacing: -0.02em;
+        }
+        .header p {
+          margin-top: 6px;
+          font-size: 14px;
+          color: var(--muted);
+          font-weight: 300;
+        }
+
+        .progress-wrap {
+          width: 100%;
+          max-width: 720px;
+          margin-bottom: 24px;
+        }
+        .progress-meta {
+          display: flex;
+          justify-content: space-between;
+          font-size: 12px;
+          font-family: var(--mono);
+          color: var(--muted);
+          margin-bottom: 6px;
+        }
+        .progress-track {
+          width: 100%;
+          height: 6px;
+          background: var(--border);
+          border-radius: 99px;
+          overflow: hidden;
+        }
+        .progress-fill {
+          height: 100%;
+          background: var(--blue);
+          border-radius: 99px;
+          transition: width 0.4s cubic-bezier(.4,0,.2,1);
+        }
+
+        .card {
+          width: 100%;
+          max-width: 720px;
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .q-meta {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 18px;
+        }
+        .q-num {
+          font-family: var(--mono);
+          font-size: 12px;
+          color: var(--muted);
+        }
+        .badge {
+          font-family: var(--mono);
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 3px 8px;
+          border-radius: 4px;
+          border: 1px solid;
+        }
+        .badge-single { color: #7c3aed; background: #f5f3ff; border-color: #c4b5fd; }
+        .badge-multi  { color: #b45309; background: #fffbeb; border-color: #fcd34d; }
+
+        .question-text {
+          font-size: 17px;
+          font-weight: 600;
+          line-height: 1.55;
+          margin-bottom: 24px;
+          letter-spacing: -0.01em;
+        }
+
+        .options { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 13px 16px;
+          border: 1.5px solid var(--border);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+          background: #fafaf9;
+          user-select: none;
+        }
+        .option:hover:not(.disabled) {
+          border-color: var(--blue);
+          background: #f0f6ff;
+          box-shadow: 0 0 0 3px rgba(55,138,221,0.08);
+        }
+        .option.selected:not(.disabled) {
+          border-color: var(--blue);
+          background: #e8f0fb;
+          box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
+        }
+        .option.correct  { border-color: var(--green); background: var(--green-light); }
+        .option.wrong    { border-color: var(--red);   background: var(--red-light); }
+        .option.missed   { border-color: var(--green); background: #f0fdf4; border-style: dashed; }
+        .option.disabled { cursor: default; }
+
+        .opt-letter {
+          flex-shrink: 0;
+          width: 26px; height: 26px;
+          border-radius: 6px;
+          background: var(--border);
+          border: 1px solid #d4d4d0;
+          display: flex; align-items: center; justify-content: center;
+          font-family: var(--mono);
+          font-size: 11px; font-weight: 600;
+          color: var(--muted);
+          transition: background 0.15s, color 0.15s;
+        }
+        .option.selected .opt-letter { background: var(--blue);  color: #fff; border-color: var(--blue); }
+        .option.correct  .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+        .option.wrong    .opt-letter { background: var(--red);   color: #fff; border-color: var(--red); }
+        .option.missed   .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+
+        .opt-text { font-size: 14px; line-height: 1.5; padding-top: 2px; }
+
+        .explanation {
+          display: none;
+          margin-top: 20px;
+          padding: 16px 18px;
+          background: #f8f8f6;
+          border: 1px solid var(--border);
+          border-left: 3px solid var(--blue);
+          border-radius: 0 8px 8px 0;
+          font-size: 13.5px;
+          line-height: 1.65;
+          color: #2d2d2b;
+        }
+        .explanation strong { color: var(--blue); }
+        .explanation.show { display: block; }
+
+        .actions {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-top: 24px;
+          gap: 12px;
+        }
+        .btn {
+          font-family: var(--sans);
+          font-size: 14px; font-weight: 600;
+          padding: 10px 22px;
+          border-radius: 8px;
+          border: none;
+          cursor: pointer;
+          transition: opacity 0.15s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+        .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+        .btn-ghost {
+          background: transparent; color: var(--muted);
+          border: 1.5px solid var(--border);
+        }
+        .btn-ghost:hover { border-color: #aaa; color: var(--text); }
+
+        .score-screen { display: none; text-align: center; }
+        .score-screen.show { display: block; }
+        .score-big {
+          font-size: 64px; font-weight: 700;
+          letter-spacing: -0.04em; line-height: 1;
+          margin: 8px 0 4px;
+        }
+        .score-label { font-size: 14px; color: var(--muted); font-family: var(--mono); margin-bottom: 20px; }
+        .score-bar-track {
+          width: 100%; height: 10px;
+          background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 24px;
+        }
+        .score-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(.4,0,.2,1) 0.3s; }
+        .score-message { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .score-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+        code {
+          font-family: var(--mono);
+          font-size: 12px;
+          background: #f0f0ee;
+          border: 1px solid var(--border);
+          padding: 1px 5px;
+          border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span class="header-tag">AWS SAA-C03</span>
+    <h1>Amazon VPC Overview — QCM</h1>
+    <p>Fondamentaux VPC · CIDR · Default vs Custom · RFC 1918 · Tenancy · Ressources automatiques</p>
+</div>
+
+<div class="progress-wrap" id="progressWrap">
+    <div class="progress-meta">
+        <span id="progressLabel">Question 1 / 12</span>
+        <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="card" id="quizCard">
+    <div id="qContent"></div>
+    <div class="actions" id="actions">
+        <button class="btn btn-primary" id="btnValidate" onclick="valider()">Valider</button>
+        <button class="btn btn-primary" id="btnNext" onclick="suivante()" style="display:none">Question suivante →</button>
+    </div>
+</div>
+
+<div class="card score-screen" id="scoreScreen">
+    <div class="header-tag" style="margin-bottom:12px">Résultat final</div>
+    <div class="score-big" id="scoreBig"></div>
+    <div class="score-label" id="scoreLabel"></div>
+    <div class="score-bar-track"><div class="score-bar-fill" id="scoreBarFill"></div></div>
+    <div class="score-message" id="scoreMsg"></div>
+    <div class="score-sub" id="scoreSub"></div>
+    <button class="btn btn-primary" onclick="recommencer()" style="width:100%;padding:13px">↺ Recommencer le QCM</button>
+</div>
+
+<script>
+    var questions = [
+      {
+        q: "Combien d'adresses IP sont disponibles dans un bloc CIDR 10.0.0.0/20 ?",
+        type: "single",
+        opts: [
+          "256",
+          "512",
+          "4 096",
+          "65 536",
+          "1 024"
+        ],
+        correct: [2],
+        expl: "<strong>Formule : 2^(32 − préfixe)</strong><br>2^(32 − 20) = 2^12 = <strong>4 096 adresses</strong>. C'est exactement la taille des subnets dans le VPC par défaut (/20), qui présentent 4 091 IPs utilisables après déduction des 5 adresses réservées par AWS."
+      },
+      {
+        q: "Un architecte reçoit pour mission de déployer une application de production sur AWS. Concernant le choix du VPC, quelle est la recommandation correcte ?",
+        type: "single",
+        opts: [
+          "Utiliser le VPC par défaut pour gagner du temps — il est déjà configuré avec un Internet Gateway",
+          "Créer un VPC custom avec un CIDR personnalisé adapté à l'architecture cible",
+          "Utiliser le VPC par défaut mais désactiver son Internet Gateway pour sécuriser l'accès",
+          "Créer autant de VPCs que de tiers applicatifs dans le VPC par défaut",
+          "Le VPC par défaut et un VPC custom sont équivalents pour la production"
+        ],
+        correct: [1],
+        expl: "<strong>Le VPC par défaut est réservé aux tests.</strong> Pour toute architecture de production, il faut créer un <em>VPC custom</em> car : il est ouvert sur Internet par défaut (risque sécurité), sa NACL autorise tout le trafic, et son CIDR fixe (<code>172.31.0.0/16</code>) peut entrer en conflit avec d'autres réseaux. Un VPC custom offre un contrôle total sur les CIDR, subnets, gateways et politiques de sécurité."
+      },
+      {
+        q: "Lesquelles de ces plages d'adresses IP sont valides pour définir le CIDR IPv4 d'un VPC Amazon (RFC 1918) ? (Sélectionnez toutes les réponses exactes)",
+        type: "multi",
+        opts: [
+          "10.0.0.0/16",
+          "172.16.5.0/24",
+          "192.168.1.0/28",
+          "203.0.113.0/24",
+          "8.8.8.0/24"
+        ],
+        correct: [0,1,2],
+        expl: "<strong>Seules les plages RFC 1918 (adresses privées) sont valides :</strong><br>• <code>10.0.0.0/8</code> → 10.x.x.x ✅<br>• <code>172.16.0.0/12</code> → 172.16.x.x à 172.31.x.x ✅<br>• <code>192.168.0.0/16</code> → 192.168.x.x ✅<br><br><code>203.0.113.0/24</code> est une adresse de documentation publique (TEST-NET-3) et <code>8.8.8.0/24</code> appartient à Google — ces plages publiques ne sont pas utilisables comme CIDR VPC."
+      },
+      {
+        q: "Qu'est-ce qu'un VPC Amazon, par définition ?",
+        type: "single",
+        opts: [
+          "Un service de réseau partagé entre plusieurs comptes AWS d'une même organisation",
+          "Un réseau virtuel logiquement isolé dans le cloud AWS, entièrement contrôlé par l'utilisateur",
+          "Un service de routage global s'étendant automatiquement sur toutes les régions AWS",
+          "Un composant réseau physique dédié à un seul client dans un datacenter AWS",
+          "Un réseau de diffusion de contenu (CDN) pour accélérer les applications web"
+        ],
+        correct: [1],
+        expl: "<strong>Un VPC est un réseau virtuel logiquement isolé</strong> — l'équivalent d'un datacenter virtuel dans le cloud. L'utilisateur contrôle entièrement la configuration IP, les subnets, le routage, les gateways et les politiques de sécurité. Il est régional (pas global) et logiquement isolé des autres VPCs (pas physiquement dédié sauf avec la tenancy Dedicated)."
+      },
+      {
+        q: "Lors de la création d'un VPC custom, quelles ressources sont créées AUTOMATIQUEMENT par AWS ? (Sélectionnez toutes les réponses exactes)",
+        type: "multi",
+        opts: [
+          "Un DHCP option set",
+          "Une route table principale (main route table)",
+          "Une NACL principale",
+          "Un Internet Gateway attaché au VPC",
+          "Des subnets dans chaque zone de disponibilité"
+        ],
+        correct: [0,1,2],
+        expl: "<strong>Ressources créées automatiquement avec un VPC custom :</strong><br>• ✅ DHCP option set (configure domaine, DNS, NTP)<br>• ✅ Route table principale (avec route locale uniquement)<br>• ✅ NACL principale (autorise tout par défaut)<br><br><strong>Non créés automatiquement :</strong><br>• ❌ Internet Gateway — doit être créé et attaché manuellement<br>• ❌ Subnets — aucun subnet n'est créé automatiquement dans un VPC custom"
+      },
+      {
+        q: "Une équipe infra constate que le compte AWS d'une région contient déjà 5 VPCs et souhaite en créer un 6ème. Quelle est la réponse correcte ?",
+        type: "single",
+        opts: [
+          "Impossible — la limite de 5 VPCs par région est une hard limit non extensible",
+          "La limite de 5 VPCs est une soft limit : une demande d'augmentation peut être soumise à AWS, mais revoir l'architecture est recommandé",
+          "Créer le 6ème VPC sans problème — la limite de 5 ne s'applique qu'au VPC par défaut",
+          "Supprimer le VPC par défaut pour libérer un slot et créer le 6ème VPC",
+          "Créer le 6ème VPC dans une autre région — la limite est globale, pas régionale"
+        ],
+        correct: [1],
+        expl: "<strong>La limite de 5 VPCs par région est une soft limit.</strong> Elle peut être augmentée sur demande via AWS Support. Cependant, atteindre cette limite est souvent le signal d'une architecture à revoir (consolidation, multi-account strategy, etc.). La limite est par <em>région</em> et par <em>compte</em> — pas globale."
+      },
+      {
+        q: "Quelle est la plage de tailles de préfixe IPv4 autorisée pour créer un VPC Amazon ?",
+        type: "single",
+        opts: [
+          "/8 à /24",
+          "/16 à /28",
+          "/16 à /32",
+          "/8 à /28",
+          "/24 à /28"
+        ],
+        correct: [1],
+        expl: "<strong>La plage autorisée est /16 à /28 :</strong><br>• <code>/16</code> = taille maximale → 65 536 adresses<br>• <code>/28</code> = taille minimale → 16 adresses (11 utilisables après les 5 réservées AWS)<br>Un préfixe plus petit que /16 (ex. /8) ne peut pas être utilisé pour un VPC. Un préfixe plus grand que /28 (ex. /30) n'est pas supporté non plus. L'IPv6 suit des règles différentes (/44 à /60)."
+      },
+      {
+        q: "Un développeur crée un VPC custom avec le CIDR 10.0.0.0/24. Quelle affirmation est correcte concernant ce VPC ?",
+        type: "single",
+        opts: [
+          "Le VPC disposera de 256 adresses IP, toutes utilisables pour des instances EC2",
+          "Le VPC ne dispose pas d'accès Internet par défaut — un Internet Gateway doit être créé et configuré manuellement",
+          "Le VPC hérite automatiquement de la configuration du VPC par défaut de la région",
+          "Le VPC sera accessible depuis Internet car 10.0.0.0 est une adresse publique routable",
+          "AWS refusera la création car /24 est trop petit pour un VPC de production"
+        ],
+        correct: [1],
+        expl: "<strong>Un VPC custom n'a pas d'accès Internet par défaut</strong> — contrairement au VPC par défaut. Pour permettre l'accès Internet, il faut : (1) créer un Internet Gateway, (2) l'attacher au VPC, (3) configurer une route table avec <code>0.0.0.0/0 → IGW</code>, et (4) s'assurer que les instances ont une IP publique. L'adresse 10.0.0.0 est une adresse RFC 1918 privée — non routable sur Internet."
+      },
+      {
+        q: "Quelle est la portée géographique d'un VPC Amazon ?",
+        type: "single",
+        opts: [
+          "Global — un VPC peut s'étendre sur toutes les régions AWS",
+          "Régional — un VPC est limité à une seule région AWS",
+          "Zonal — un VPC est limité à une seule zone de disponibilité",
+          "Continental — un VPC couvre automatiquement toutes les régions d'un continent",
+          "Multi-régional — un VPC peut être étendu à 2 régions maximum"
+        ],
+        correct: [1],
+        expl: "<strong>Un VPC est une ressource régionale.</strong> Il ne s'étend pas sur plusieurs régions. Les subnets du VPC sont eux limités à une seule AZ (zone de disponibilité) au sein de la région. Pour connecter des VPCs de différentes régions, il faut utiliser des mécanismes spécifiques comme VPC Peering inter-régions ou AWS Transit Gateway."
+      },
+      {
+        q: "Un VPC par défaut a le CIDR 172.31.0.0/16. Un développeur déploie une instance EC2 dans ce VPC sans configuration supplémentaire. Quel est le comportement attendu ?",
+        type: "multi",
+        opts: [
+          "L'instance reçoit automatiquement une adresse IP publique",
+          "L'instance est accessible depuis Internet sans configuration supplémentaire",
+          "La NACL du subnet bloque tout trafic entrant par défaut",
+          "L'instance peut accéder à Internet via l'Internet Gateway attaché par défaut",
+          "L'instance n'a pas accès à Internet — le VPC par défaut n'a pas d'IGW"
+        ],
+        correct: [0,1,3],
+        expl: "<strong>Le VPC par défaut est ouvert sur Internet par défaut :</strong><br>• ✅ Toute instance reçoit automatiquement une IP publique<br>• ✅ L'instance est accessible depuis Internet (risque sécurité majeur)<br>• ✅ La route table contient déjà une route <code>0.0.0.0/0 → IGW</code><br><br><strong>Incorrect :</strong><br>• ❌ La NACL par défaut autorise <em>tout</em> le trafic (entrant et sortant)<br>• ❌ Le VPC par défaut <em>possède</em> bien un IGW attaché automatiquement"
+      },
+      {
+        q: "Lors de la création d'un VPC custom, l'option 'Tenancy' est définie sur 'Dedicated'. Quelle est la conséquence principale ?",
+        type: "single",
+        opts: [
+          "Les instances EC2 du VPC sont automatiquement distribuées sur plusieurs AZs",
+          "Toutes les instances EC2 lancées dans ce VPC tournent sur du matériel physique dédié à un seul client, à un coût plus élevé",
+          "Le VPC est isolé des autres VPCs du compte mais partage le matériel avec d'autres clients AWS",
+          "La tenancy Dedicated permet de dépasser la limite de 5 VPCs par région",
+          "Les instances ont automatiquement des performances réseau améliorées (Enhanced Networking)"
+        ],
+        correct: [1],
+        expl: "<strong>Dedicated Tenancy = matériel physique exclusif.</strong> Toutes les instances lancées dans un VPC à tenancy dédiée tournent sur des serveurs physiques réservés exclusivement à un client. Cela répond à des exigences de conformité strictes (ex. certifications régulées). Inconvénient : coût significativement plus élevé. La tenancy <em>Default</em> (mutualisée) est recommandée sauf besoin de conformité spécifique."
+      },
+      {
+        q: "Un architecte doit planifier le CIDR d'un nouveau VPC de production. Quelles considérations sont importantes ? (Sélectionnez toutes les réponses exactes)",
+        type: "multi",
+        opts: [
+          "Choisir une plage suffisamment large car le CIDR est difficile à modifier après déploiement",
+          "S'assurer que la plage IP n'entre pas en conflit avec les réseaux on-premises en cas de future connexion VPN",
+          "Utiliser impérativement le CIDR 172.31.0.0/16 pour rester cohérent avec le VPC par défaut",
+          "Utiliser une plage RFC 1918 pour garantir que les adresses ne sont pas routables sur Internet",
+          "Préférer un /28 pour minimiser les coûts liés aux adresses IP"
+        ],
+        correct: [0,1,3],
+        expl: "<strong>Bonnes pratiques de planification CIDR :</strong><br>• ✅ Planifier large dès le début — le CIDR d'un VPC est très difficile à modifier après création (nécessite reconstruction).<br>• ✅ Éviter les conflits avec les réseaux on-premises ou d'autres VPCs pour faciliter le peering/VPN futur.<br>• ✅ Utiliser les plages RFC 1918 (10.x, 172.16-31.x, 192.168.x) — adresses privées non routables.<br><br><strong>Incorrect :</strong><br>• ❌ Pas d'obligation d'utiliser 172.31.0.0/16 (c'est le CIDR du VPC par défaut).<br>• ❌ Le /28 est trop restrictif pour la production (seulement 11 IPs utilisables par subnet)."
+      }
+    ];
+
+    var qIdx = 0;
+    var selected = [];
+    var answered = false;
+    var score = 0;
+
+    function paint() {
+      var q = questions[qIdx];
+      var letters = ['A','B','C','D','E'];
+      var html = '';
+      html += '<div class="q-meta">';
+      html += '<span class="q-num">Q' + (qIdx+1) + ' / ' + questions.length + '</span>';
+      if (q.type === 'single') {
+        html += '<span class="badge badge-single">Réponse unique</span>';
+      } else {
+        html += '<span class="badge badge-multi">Réponses multiples</span>';
+      }
+      html += '</div>';
+      html += '<div class="question-text">' + q.q + '</div>';
+      html += '<div class="options" id="opts">';
+      for (var i = 0; i < q.opts.length; i++) {
+        html += '<div class="option" id="opt' + i + '" onclick="pickOption(' + i + ')">';
+        html += '<div class="opt-letter">' + letters[i] + '</div>';
+        html += '<div class="opt-text">' + q.opts[i] + '</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+      html += '<div class="explanation" id="expl">' + q.expl + '</div>';
+      document.getElementById('qContent').innerHTML = html;
+      document.getElementById('btnValidate').style.display = 'inline-block';
+      document.getElementById('btnValidate').disabled = true;
+      document.getElementById('btnNext').style.display = 'none';
+      paintProgress();
+    }
+
+    function paintProgress() {
+      var pct = Math.round((qIdx / questions.length) * 100);
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressLabel').textContent = 'Question ' + (qIdx+1) + ' / ' + questions.length;
+      document.getElementById('progressPct').textContent = pct + '%';
+    }
+
+    function pickOption(i) {
+      if (answered) return;
+      var q = questions[qIdx];
+      if (q.type === 'single') {
+        selected = [i];
+        for (var j = 0; j < q.opts.length; j++) {
+          document.getElementById('opt' + j).classList.remove('selected');
+        }
+        document.getElementById('opt' + i).classList.add('selected');
+      } else {
+        var idx = selected.indexOf(i);
+        if (idx === -1) {
+          selected.push(i);
+          document.getElementById('opt' + i).classList.add('selected');
+        } else {
+          selected.splice(idx, 1);
+          document.getElementById('opt' + i).classList.remove('selected');
+        }
+      }
+      document.getElementById('btnValidate').disabled = (selected.length === 0);
+    }
+
+    function valider() {
+      if (answered || selected.length === 0) return;
+      answered = true;
+      var q = questions[qIdx];
+      var correct = q.correct;
+      var isCorrect = true;
+      if (selected.length !== correct.length) {
+        isCorrect = false;
+      } else {
+        for (var i = 0; i < correct.length; i++) {
+          if (selected.indexOf(correct[i]) === -1) { isCorrect = false; break; }
+        }
+      }
+      if (isCorrect) score++;
+      for (var j = 0; j < q.opts.length; j++) {
+        var el = document.getElementById('opt' + j);
+        el.classList.remove('selected');
+        el.classList.add('disabled');
+        el.onclick = null;
+        var inSelected = selected.indexOf(j) !== -1;
+        var inCorrect = correct.indexOf(j) !== -1;
+        if (inSelected && inCorrect)   el.classList.add('correct');
+        else if (inSelected && !inCorrect) el.classList.add('wrong');
+        else if (!inSelected && inCorrect) el.classList.add('missed');
+      }
+      document.getElementById('expl').classList.add('show');
+      document.getElementById('btnValidate').style.display = 'none';
+      document.getElementById('btnNext').style.display = 'inline-block';
+      document.getElementById('btnNext').textContent = qIdx < questions.length - 1 ? 'Question suivante →' : 'Voir le score →';
+    }
+
+    function suivante() {
+      qIdx++;
+      selected = [];
+      answered = false;
+      if (qIdx >= questions.length) { paintScore(); return; }
+      paint();
+    }
+
+    function paintScore() {
+      document.getElementById('quizCard').style.display = 'none';
+      document.getElementById('progressWrap').style.display = 'none';
+      var ss = document.getElementById('scoreScreen');
+      ss.classList.add('show');
+      var pct = Math.round((score / questions.length) * 100);
+      document.getElementById('scoreBig').textContent = score + ' / ' + questions.length;
+      document.getElementById('scoreLabel').textContent = pct + '% de réussite';
+      var fill = document.getElementById('scoreBarFill');
+      var color = pct >= 80 ? '#22c55e' : pct >= 60 ? '#f59e0b' : '#ef4444';
+      fill.style.background = color;
+      setTimeout(function() { fill.style.width = pct + '%'; }, 50);
+      var msg, sub;
+      if (pct >= 80) {
+        msg = '🎯 Excellent — Fondamentaux VPC maîtrisés';
+        sub = 'Vous avez bien assimilé les concepts de base VPC (CIDR, RFC 1918, Default vs Custom, Tenancy). Passez aux modules suivants : Subnets, Route Tables, NACLs et Security Groups.';
+      } else if (pct >= 60) {
+        msg = '📚 Bon niveau — Quelques points à consolider';
+        sub = 'Revoyez le calcul CIDR (2^(32-préfixe)), les plages RFC 1918 et les ressources créées automatiquement avec un VPC custom. Ces points sont fréquemment testés.';
+      } else {
+        msg = '🔄 Bases à renforcer';
+        sub = 'Relisez les sections sur la différence Default/Custom VPC, les plages IP RFC 1918 et la signification de la tenancy. Ce sont les fondations de toute architecture AWS.';
+      }
+      document.getElementById('scoreMsg').textContent = msg;
+      document.getElementById('scoreSub').textContent = sub;
+    }
+
+    function recommencer() {
+      qIdx = 0; selected = []; answered = false; score = 0;
+      document.getElementById('scoreScreen').classList.remove('show');
+      document.getElementById('quizCard').style.display = 'block';
+      document.getElementById('progressWrap').style.display = 'block';
+      paint();
+    }
+
+    paint();
+</script>
+</body>
+</html>

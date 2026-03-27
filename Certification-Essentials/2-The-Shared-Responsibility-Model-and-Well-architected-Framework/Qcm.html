@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM AWS – Fondations : Responsabilité, Well-Architected & Résilience</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #f5f5f3;
+          --card: #ffffff;
+          --blue: #378ADD;
+          --blue-dark: #2567b8;
+          --green: #22c55e;
+          --green-light: #dcfce7;
+          --red: #ef4444;
+          --red-light: #fee2e2;
+          --border: #e2e2de;
+          --text: #1a1a1a;
+          --muted: #6b7280;
+          --mono: 'IBM Plex Mono', monospace;
+          --sans: 'Sora', system-ui, sans-serif;
+        }
+
+        body {
+          font-family: var(--sans);
+          background: var(--bg);
+          color: var(--text);
+          min-height: 100vh;
+          padding: 32px 16px 64px;
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 32px;
+        }
+
+        .header .eyebrow {
+          font-family: var(--mono);
+          font-size: 11px;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: var(--blue);
+          background: #eaf3ff;
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 20px;
+          margin-bottom: 12px;
+        }
+
+        .header h1 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--text);
+          line-height: 1.25;
+        }
+
+        .header p {
+          color: var(--muted);
+          font-size: 0.875rem;
+          margin-top: 6px;
+        }
+
+        .topics {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .topic-tag {
+          font-family: var(--mono);
+          font-size: 10px;
+          letter-spacing: 0.05em;
+          padding: 3px 10px;
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          background: #fafaf8;
+        }
+
+        .card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          max-width: 760px;
+          margin: 0 auto;
+          padding: 32px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-wrap {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 28px;
+        }
+
+        .progress-bar-bg {
+          flex: 1;
+          height: 6px;
+          background: #e9e9e6;
+          border-radius: 99px;
+          overflow: hidden;
+        }
+
+        .progress-bar-fill {
+          height: 100%;
+          background: var(--blue);
+          border-radius: 99px;
+          transition: width 0.4s ease;
+        }
+
+        .progress-label {
+          font-family: var(--mono);
+          font-size: 12px;
+          color: var(--muted);
+          white-space: nowrap;
+        }
+
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--mono);
+          font-size: 11px;
+          letter-spacing: 0.05em;
+          padding: 4px 10px;
+          border-radius: 6px;
+          margin-bottom: 6px;
+          font-weight: 600;
+        }
+
+        .badge.single { background: #fff7ed; color: #c2510a; border: 1px solid #fed7aa; }
+        .badge.multiple { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+
+        .badge::before {
+          content: '';
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: currentColor;
+        }
+
+        .chapter-tag {
+          display: inline-block;
+          font-family: var(--mono);
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 2px 8px;
+          border-radius: 4px;
+          margin-bottom: 10px;
+          margin-left: 8px;
+          background: #f3f0ff;
+          color: #6d28d9;
+          border: 1px solid #ddd6fe;
+        }
+
+        .question-num {
+          font-family: var(--mono);
+          font-size: 11px;
+          color: var(--muted);
+          margin-bottom: 8px;
+        }
+
+        .question-text {
+          font-size: 1.03rem;
+          font-weight: 600;
+          line-height: 1.6;
+          margin-bottom: 22px;
+          color: var(--text);
+        }
+
+        .options { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 13px 16px;
+          border: 1.5px solid var(--border);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s;
+          background: #fafafa;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        .option:hover:not(.disabled) { border-color: var(--blue); background: #f0f7ff; }
+        .option.selected { border-color: var(--blue); background: #eaf3ff; }
+
+        .option .letter {
+          font-family: var(--mono);
+          font-weight: 600;
+          font-size: 12px;
+          color: var(--muted);
+          background: #f0f0ed;
+          border-radius: 5px;
+          min-width: 26px;
+          height: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: background 0.15s, color 0.15s;
+        }
+
+        .option.selected .letter { background: var(--blue); color: #fff; }
+
+        .option.correct { border-color: var(--green); background: var(--green-light); }
+        .option.correct .letter { background: var(--green); color: #fff; }
+
+        .option.wrong { border-color: var(--red); background: var(--red-light); }
+        .option.wrong .letter { background: var(--red); color: #fff; }
+
+        .option.missed { border-color: var(--green); background: #f0fdf4; border-style: dashed; }
+        .option.missed .letter { background: #86efac; color: #166534; }
+
+        .option.disabled { cursor: default; }
+
+        .actions {
+          display: flex;
+          gap: 12px;
+          margin-top: 24px;
+          align-items: center;
+        }
+
+        .btn {
+          padding: 11px 22px;
+          border: none;
+          border-radius: 8px;
+          font-family: var(--sans);
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background 0.15s, transform 0.1s, opacity 0.15s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-ghost {
+          background: transparent;
+          color: var(--muted);
+          border: 1.5px solid var(--border);
+        }
+        .btn-ghost:hover { background: #f0f0ed; }
+
+        .explanation {
+          margin-top: 20px;
+          padding: 16px 18px;
+          background: #f8f8f6;
+          border-left: 3px solid var(--blue);
+          border-radius: 0 8px 8px 0;
+          font-size: 0.875rem;
+          line-height: 1.7;
+          color: #333;
+          display: none;
+        }
+
+        .explanation.show { display: block; }
+        .explanation strong { color: var(--blue-dark); }
+        .explanation em { color: #374151; font-style: normal; font-weight: 600; }
+
+        /* Score */
+        .score-screen { text-align: center; }
+
+        .score-big {
+          font-size: 4rem;
+          font-weight: 700;
+          font-family: var(--mono);
+          color: var(--blue);
+          line-height: 1;
+          margin: 16px 0 4px;
+        }
+
+        .score-sub {
+          color: var(--muted);
+          font-size: 0.9rem;
+          margin-bottom: 24px;
+        }
+
+        .score-bar-wrap {
+          background: #e9e9e6;
+          border-radius: 99px;
+          height: 12px;
+          overflow: hidden;
+          margin: 0 auto 24px;
+          max-width: 420px;
+        }
+
+        .score-bar-fill {
+          height: 100%;
+          border-radius: 99px;
+          transition: width 1s cubic-bezier(.4,0,.2,1);
+        }
+
+        .score-msg { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .score-detail { font-size: 0.875rem; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+        .score-breakdown {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          flex-wrap: wrap;
+          margin-bottom: 24px;
+        }
+
+        .score-pill {
+          font-family: var(--mono);
+          font-size: 11px;
+          padding: 5px 14px;
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          background: #fafaf8;
+        }
+
+        .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+        @media (max-width: 520px) {
+          .card { padding: 20px 14px; }
+          .header h1 { font-size: 1.2rem; }
+          .score-big { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="eyebrow">AWS SAA-C03</div>
+    <h1>Responsabilité Partagée · Well-Architected · HA &amp; Fault Tolerance</h1>
+    <p>18 questions · Niveau intermédiaire à avancé</p>
+    <div class="topics">
+        <span class="topic-tag">Shared Responsibility Model</span>
+        <span class="topic-tag">Well-Architected Framework</span>
+        <span class="topic-tag">Well-Architected Tool</span>
+        <span class="topic-tag">High Availability</span>
+        <span class="topic-tag">Fault Tolerance</span>
+        <span class="topic-tag">RTO / RPO</span>
+    </div>
+</div>
+
+<div class="card" id="card"></div>
+
+<script>
+    var questions = [
+      // ── Shared Responsibility Model ──────────────────────────────────────
+      {
+        chapter: "Shared Responsibility",
+        q: "Selon le modèle de responsabilité partagée d'AWS, laquelle des actions suivantes relève UNIQUEMENT de la responsabilité du client ?",
+        type: "single",
+        opts: [
+          "Maintenir la sécurité physique des data centers AWS",
+          "Mettre à jour le firmware des serveurs hôtes EC2",
+          "Activer le chiffrement au repos sur ses buckets S3",
+          "Assurer la redondance réseau entre les zones de disponibilité"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> Le chiffrement au repos des données (ex. : S3, EBS) est une responsabilité du client. AWS fournit les <em>fonctionnalités</em> de chiffrement, mais c'est au client de les activer. La sécurité physique des DC, la mise à jour du firmware et la redondance réseau de l'infrastructure sont des responsabilités AWS (sécurité <em>du</em> cloud)."
+      },
+      {
+        chapter: "Shared Responsibility",
+        q: "Quelles responsabilités appartiennent à AWS dans le modèle de responsabilité partagée ? (Choisissez 3)",
+        type: "multiple",
+        opts: [
+          "Sécurité physique des data centers",
+          "Gestion des correctifs du système d'exploitation des instances EC2 du client",
+          "Maintenance du matériel sous-jacent (hardware)",
+          "Infrastructure mondiale : Régions, AZ et Edge Locations",
+          "Configuration des règles de pare-feu (Security Groups) par le client"
+        ],
+        correct: [0, 2, 3],
+        expl: "<strong>Réponses A, C et D.</strong> AWS est responsable de : la sécurité physique des DC, la maintenance du hardware sous-jacent, et l'infrastructure mondiale (Régions/AZ/Edge). En revanche, les correctifs OS sur les instances EC2 (modèle IaaS) et la configuration des Security Groups sont des responsabilités du client."
+      },
+      {
+        chapter: "Shared Responsibility",
+        q: "Un client utilise Amazon RDS (service managé). Comment la responsabilité est-elle répartie concernant les correctifs du moteur de base de données ?",
+        type: "single",
+        opts: [
+          "Le client est entièrement responsable d'appliquer les correctifs du moteur de DB",
+          "AWS applique automatiquement les correctifs du moteur DB dans le cadre du service managé",
+          "La responsabilité est partagée 50/50 : le client choisit quand, AWS applique",
+          "Aucune mise à jour n'est effectuée sur RDS ; c'est un service immuable"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Avec les services managés comme RDS, AWS prend en charge la maintenance du moteur de base de données (correctifs, mises à jour). C'est l'un des avantages des services managés : le client se concentre sur ses données et son application, pas sur l'administration du moteur. En revanche, les correctifs de l'OS sur une EC2 avec DB auto-hébergée restent la responsabilité du client."
+      },
+      {
+        chapter: "Shared Responsibility",
+        q: "Quelle affirmation illustre le mieux le principe « sécurité dans le cloud » (in the cloud) ?",
+        type: "single",
+        opts: [
+          "AWS redonde les alimentations électriques dans chaque zone de disponibilité",
+          "Le client configure des politiques IAM pour restreindre l'accès à ses ressources",
+          "AWS maintient les câbles réseau reliant ses data centers",
+          "AWS remplace les disques défaillants sur ses serveurs physiques"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> La sécurité <em>dans</em> le cloud englobe tout ce que le client déploie et configure : IAM, Security Groups, chiffrement, sauvegardes, contrôle des accès. La gestion des alimentations, du câblage réseau et du remplacement de matériel est la sécurité <em>du</em> cloud — responsabilité AWS."
+      },
+      {
+        chapter: "Shared Responsibility",
+        q: "Une entreprise est auditée et doit prouver que ses données S3 sont chiffrées au repos. Qui est responsable de cette exigence et comment y répondre ?",
+        type: "single",
+        opts: [
+          "AWS ; le chiffrement S3 est activé par défaut et transparent pour le client",
+          "Le client ; il doit activer le chiffrement côté serveur (SSE) sur ses buckets S3",
+          "Partagé ; AWS chiffre les données, le client gère les clés uniquement",
+          "Le client uniquement si les données sont classifiées gouvernementales"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> La protection des données <em>dans</em> le cloud est la responsabilité du client. Pour S3, cela signifie activer le chiffrement SSE-S3, SSE-KMS ou SSE-C selon les besoins. Depuis 2023, AWS active par défaut le chiffrement SSE-S3 sur les nouveaux buckets, mais la gestion des politiques de chiffrement et des clés reste une responsabilité client."
+      },
+
+      // ── Well-Architected Framework ────────────────────────────────────────
+      {
+        chapter: "Well-Architected Framework",
+        q: "Un architecte souhaite s'assurer qu'une application se rétablit rapidement après une panne et fonctionne de façon cohérente. Quel pilier du Well-Architected Framework adresse principalement ce besoin ?",
+        type: "single",
+        opts: [
+          "Performance Efficiency",
+          "Operational Excellence",
+          "Reliability",
+          "Sustainability"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C — Reliability.</strong> Le pilier Fiabilité vise à garantir un fonctionnement cohérent et une récupération rapide en cas de panne (auto-scaling, failover DNS, tests de récupération). Performance Efficiency concerne l'utilisation des ressources adaptées ; Operational Excellence concerne les processus opérationnels au quotidien."
+      },
+      {
+        chapter: "Well-Architected Framework",
+        q: "Quels exemples de pratiques sont directement alignés avec le pilier Sustainability (Durabilité) ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "Surcapacité permanente pour absorber les pics de charge",
+          "Auto-scaling pour provisionner uniquement les ressources nécessaires au moment T",
+          "Utilisation de services managés AWS pour éviter les serveurs inutilisés",
+          "Déploiement multi-région pour tous les workloads non critiques",
+          "Journalisation exhaustive de toutes les requêtes API pour l'audit"
+        ],
+        correct: [1, 2],
+        expl: "<strong>Réponses B et C.</strong> Le pilier Sustainability vise à minimiser l'empreinte environnementale. L'auto-scaling évite de maintenir des serveurs allumés en permanence pour des pics imprévisibles. Les services managés AWS maximisent l'utilisation des ressources partagées, réduisant le gaspillage global. La surcapacité permanente est à l'opposé de ce pilier."
+      },
+      {
+        chapter: "Well-Architected Framework",
+        q: "Un développeur propose de tout gérer sur des instances EC2 au lieu d'utiliser les services managés AWS. Quel pilier est principalement mis en danger par cette décision ?",
+        type: "single",
+        opts: [
+          "Security uniquement",
+          "Cost Optimization et Operational Excellence simultanément",
+          "Performance Efficiency uniquement",
+          "Reliability uniquement"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Gérer soi-même des composants que des services managés AWS pourraient gérer impacte à la fois le coût (effort de gestion supplémentaire = coût opérationnel) et l'excellence opérationnelle (processus manuels, risques d'erreurs, maintenance non différenciée). Le Well-Architected Framework recommande de privilégier les services managés pour se concentrer sur la valeur métier."
+      },
+      {
+        chapter: "Well-Architected Framework",
+        q: "Quelle affirmation décrit le mieux le pilier Operational Excellence du Well-Architected Framework ?",
+        type: "single",
+        opts: [
+          "Réduire les coûts en utilisant les instances Spot EC2 pour tous les workloads",
+          "Collecter des métriques, exécuter des workloads efficacement et améliorer continuellement les processus opérationnels",
+          "Protéger les données via le chiffrement et les contrôles d'accès IAM",
+          "S'assurer que l'architecture ne dépasse jamais 99,9% de disponibilité"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Operational Excellence porte sur l'efficacité des opérations : infrastructure as code, changements fréquents et petits, métriques pour mesurer l'efficacité, amélioration continue. Ce n'est pas un pilier de coût (C), ni de sécurité (C), ni de disponibilité pure (D)."
+      },
+      {
+        chapter: "Well-Architected Framework",
+        q: "Quels piliers du Well-Architected Framework sont directement concernés par le déploiement serverless (ex. AWS Lambda) ? (Choisissez 3)",
+        type: "multiple",
+        opts: [
+          "Cost Optimization — facturation à l'invocation, pas de ressources inutilisées",
+          "Performance Efficiency — ressources de calcul adaptées, scaling automatique",
+          "Sustainability — moins de serveurs provisionnés en permanence",
+          "Security — Lambda supprime tous les besoins d'IAM",
+          "Reliability — Lambda garantit toujours 100% de disponibilité"
+        ],
+        correct: [0, 1, 2],
+        expl: "<strong>Réponses A, B et C.</strong> Lambda illustre plusieurs piliers : Cost Optimization (paiement à l'usage, zéro serveur idle), Performance Efficiency (scaling automatique, ressources adaptées au workload), et Sustainability (pas de capacité dormante). Lambda n'élimine pas les besoins IAM (D est faux) et ne garantit pas 100% de dispo (E est faux — aucun service ne le garantit seul)."
+      },
+
+      // ── Well-Architected Tool ─────────────────────────────────────────────
+      {
+        chapter: "Well-Architected Tool",
+        q: "Quel est le principal cas d'usage du AWS Well-Architected Tool ?",
+        type: "single",
+        opts: [
+          "Déployer automatiquement des architectures conformes aux bonnes pratiques AWS",
+          "Générer des rapports de coûts et des factures détaillées par service",
+          "Évaluer une architecture existante ou en cours de conception par rapport aux six piliers et obtenir des recommandations d'amélioration",
+          "Tester la résilience d'une application via des simulations de panne automatisées"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> Le Well-Architected Tool est un service de <em>revue et d'évaluation</em> : il pose des questions sur votre workload, identifie les risques par rapport aux six piliers, et fournit des recommandations priorisées. Il ne déploie pas (A), ne génère pas de factures (B), et n'est pas un outil de chaos engineering (D — c'est plutôt AWS Fault Injection Simulator)."
+      },
+      {
+        chapter: "Well-Architected Tool",
+        q: "Un architecte utilise le Well-Architected Tool pour évaluer son architecture. Quelle affirmation est correcte concernant son utilisation ?",
+        type: "single",
+        opts: [
+          "C'est un service tiers qui nécessite une licence payante séparée",
+          "Il s'utilise directement dans la console AWS et aide à documenter les décisions d'architecture",
+          "Il est réservé aux comptes AWS Enterprise Support uniquement",
+          "Il évalue uniquement le pilier Security, les autres nécessitent des outils séparés"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Le Well-Architected Tool est un service AWS natif, accessible gratuitement dans la console AWS. Il permet de documenter les décisions d'architecture, d'évaluer l'alignement avec les six piliers, et de suivre l'avancement des améliorations. Il n'est pas réservé à un niveau de support particulier et couvre bien les six piliers."
+      },
+
+      // ── High Availability & Fault Tolerance ──────────────────────────────
+      {
+        chapter: "HA & Fault Tolerance",
+        q: "Quelle est la différence fondamentale entre la haute disponibilité (HA) et la tolérance aux pannes (FT) ?",
+        type: "single",
+        opts: [
+          "La HA vise 100% d'uptime ; la FT accepte de courtes interruptions",
+          "La HA tolère de brèves interruptions avec récupération rapide ; la FT assure un basculement transparent sans aucune interruption",
+          "La FT est uniquement applicable aux bases de données ; la HA s'applique aux applications web",
+          "La HA repose sur plusieurs régions ; la FT repose sur plusieurs AZ"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> C'est la distinction clé : la HA vise ~99,99% de disponibilité avec une récupération rapide en cas de panne (courte interruption acceptable). La FT vise 100% d'uptime avec un basculement automatique et transparent — les utilisateurs ne doivent rien remarquer. La FT est un niveau supérieur de résilience, plus coûteux à implémenter."
+      },
+      {
+        chapter: "HA & Fault Tolerance",
+        q: "Un SLA indique que le RTO est de 4 heures et le RPO est de 1 heure. Quelle interprétation est correcte ?",
+        type: "single",
+        opts: [
+          "Le système doit être restauré en 1h et peut perdre jusqu'à 4h de données",
+          "Le système doit être restauré en 4h et peut perdre jusqu'à 1h de données",
+          "Les sauvegardes doivent être effectuées toutes les 4h et le failover prend 1h",
+          "Le RPO de 1h signifie que 1h de données est répliquée en temps réel"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> RTO (Recovery Time Objective) = temps maximum acceptable pour restaurer le système = 4h. RPO (Recovery Point Objective) = perte de données maximale acceptable exprimée en temps = 1h (on peut se permettre de perdre les données des 60 dernières minutes). Un RPO de 1h implique des sauvegardes au moins toutes les heures."
+      },
+      {
+        chapter: "HA & Fault Tolerance",
+        q: "Quelle architecture AWS illustre le mieux la haute disponibilité (HA) pour une application web ?",
+        type: "single",
+        opts: [
+          "Une instance EC2 unique dans une seule AZ avec un snapshot quotidien",
+          "Un Application Load Balancer avec un Auto Scaling Group déployé sur 3 AZ",
+          "Amazon Aurora Global Database avec réplication synchrone multi-région",
+          "Une instance EC2 avec EBS Multi-Attach activé"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Un ALB + Auto Scaling Group multi-AZ est l'exemple canonique de HA : si une AZ tombe, le trafic est redirigé automatiquement vers les instances dans les autres AZ (interruption minimale). Aurora Global multi-région est un exemple de <em>Fault Tolerance</em> (niveau supérieur). Une EC2 unique est un SPOF, et EBS Multi-Attach ne confère pas de HA applicative."
+      },
+      {
+        chapter: "HA & Fault Tolerance",
+        q: "Quelles caractéristiques s'appliquent à la tolérance aux pannes (Fault Tolerance) ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "Basculement automatique et transparent pour les utilisateurs finaux",
+          "Objectif d'uptime à 100% — aucune interruption de service",
+          "Accepte de courtes interruptions de service mesurées en secondes",
+          "Est généralement moins coûteuse que la haute disponibilité",
+          "Exemples : EC2 avec Auto Scaling dans une seule AZ"
+        ],
+        correct: [0, 1],
+        expl: "<strong>Réponses A et B.</strong> La FT se caractérise par un basculement <em>transparent</em> (les utilisateurs ne remarquent rien) et un objectif de 100% de disponibilité. C'est un niveau supérieur à la HA. Elle est généralement plus coûteuse (réplication synchrone, ressources en standby chaud), pas moins (D faux). Un EC2 en AZ unique est un SPOF, à l'opposé de la FT (E faux)."
+      },
+      {
+        chapter: "HA & Fault Tolerance",
+        q: "Selon les bonnes pratiques AWS, quelle règle générale s'applique à l'utilisation des AZ et des régions pour la résilience ?",
+        type: "single",
+        opts: [
+          "Les régions gèrent la haute disponibilité ; les AZ gèrent la tolérance aux pannes",
+          "Les AZ gèrent la haute disponibilité ; les régions gèrent la tolérance aux pannes et les failovers",
+          "Les AZ et les régions sont équivalentes pour la résilience ; le choix dépend du coût",
+          "La tolérance aux pannes nécessite toujours au minimum 5 AZ dans la même région"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> La règle générale AWS : les <em>AZ</em> servent à la haute disponibilité (résilience aux pannes locales dans une région), tandis que les <em>régions</em> servent à la tolérance aux pannes et aux plans de DR (Disaster Recovery) pour résister à des catastrophes affectant une région entière. Exemple : Aurora Multi-AZ = HA ; Aurora Global Database = Fault Tolerance."
+      },
+      {
+        chapter: "HA & Fault Tolerance",
+        q: "Une application financière exige un RPO de zéro seconde. Quelle architecture répond à cette exigence ?",
+        type: "single",
+        opts: [
+          "Sauvegardes automatiques RDS toutes les 5 minutes",
+          "Réplication synchrone des données (toute transaction est confirmée uniquement après écriture sur plusieurs sites)",
+          "Snapshots EBS toutes les heures avec restauration automatique",
+          "Amazon S3 avec versioning activé et réplication cross-région"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Un RPO de 0 signifie zéro perte de données — chaque transaction doit être confirmée uniquement après avoir été écrite sur tous les sites de réplication. Cela nécessite une <em>réplication synchrone</em> (ex. : Aurora avec écriture confirmée sur 6 copies dans 3 AZ). Les sauvegardes périodiques (A, C) et la réplication asynchrone impliquent forcément un RPO > 0."
+      }
+    ];
+
+    var qIdx = 0;
+    var selected = [];
+    var answered = false;
+    var score = 0;
+
+    function paint() {
+      var q = questions[qIdx];
+      var letters = ['A','B','C','D','E'];
+      var isMultiple = q.type === 'multiple';
+      var progressPct = Math.round((qIdx / questions.length) * 100);
+
+      var optsHTML = '';
+      for (var i = 0; i < q.opts.length; i++) {
+        optsHTML += '<div class="option" id="opt' + i + '" onclick="pickOption(' + i + ')">' +
+          '<span class="letter">' + letters[i] + '</span>' +
+          '<span>' + q.opts[i] + '</span>' +
+        '</div>';
+      }
+
+      var html =
+        '<div class="progress-wrap">' +
+          '<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + progressPct + '%"></div></div>' +
+          '<span class="progress-label">' + (qIdx + 1) + ' / ' + questions.length + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:12px;">' +
+          '<span class="badge ' + (isMultiple ? 'multiple' : 'single') + '">' +
+            (isMultiple ? 'Réponses multiples' : 'Réponse unique') +
+          '</span>' +
+          '<span class="chapter-tag">' + q.chapter + '</span>' +
+        '</div>' +
+        '<div class="question-num">Question ' + (qIdx + 1) + ' sur ' + questions.length + '</div>' +
+        '<div class="question-text">' + q.q + '</div>' +
+        '<div class="options">' + optsHTML + '</div>' +
+        '<div class="actions">' +
+          '<button class="btn btn-primary" id="btnValidate" onclick="valider()" disabled>Valider</button>' +
+          '<button class="btn btn-primary" id="btnNext" onclick="suivante()" style="display:none">Question suivante →</button>' +
+        '</div>' +
+        '<div class="explanation" id="expl"></div>';
+
+      document.getElementById('card').innerHTML = html;
+    }
+
+    function pickOption(idx) {
+      if (answered) return;
+      var q = questions[qIdx];
+      var isMultiple = q.type === 'multiple';
+
+      if (isMultiple) {
+        var pos = selected.indexOf(idx);
+        if (pos === -1) { selected.push(idx); } else { selected.splice(pos, 1); }
+      } else {
+        selected = [idx];
+      }
+
+      for (var i = 0; i < q.opts.length; i++) {
+        var el = document.getElementById('opt' + i);
+        el.className = selected.indexOf(i) !== -1 ? 'option selected' : 'option';
+      }
+
+      document.getElementById('btnValidate').disabled = selected.length === 0;
+    }
+
+    function valider() {
+      if (answered) return;
+      answered = true;
+
+      var q = questions[qIdx];
+      var correct = q.correct;
+
+      var isRight = true;
+      if (selected.length !== correct.length) {
+        isRight = false;
+      } else {
+        for (var i = 0; i < correct.length; i++) {
+          if (selected.indexOf(correct[i]) === -1) { isRight = false; break; }
+        }
+      }
+      if (isRight) score++;
+
+      for (var i = 0; i < q.opts.length; i++) {
+        var el = document.getElementById('opt' + i);
+        var isSel = selected.indexOf(i) !== -1;
+        var isCorr = correct.indexOf(i) !== -1;
+        if (isSel && isCorr) { el.className = 'option disabled correct'; }
+        else if (isSel && !isCorr) { el.className = 'option disabled wrong'; }
+        else if (!isSel && isCorr) { el.className = 'option disabled missed'; }
+        else { el.className = 'option disabled'; }
+      }
+
+      var expl = document.getElementById('expl');
+      expl.innerHTML = q.expl;
+      expl.className = 'explanation show';
+
+      document.getElementById('btnValidate').style.display = 'none';
+      document.getElementById('btnNext').style.display = 'inline-block';
+      if (qIdx === questions.length - 1) {
+        document.getElementById('btnNext').textContent = 'Voir le score →';
+      }
+    }
+
+    function suivante() {
+      qIdx++;
+      selected = [];
+      answered = false;
+      if (qIdx < questions.length) { paint(); } else { paintScore(); }
+    }
+
+    function paintScore() {
+      var pct = Math.round((score / questions.length) * 100);
+      var color, msg, detail;
+
+      if (pct >= 80) {
+        color = '#22c55e';
+        msg = '🎉 Excellent résultat !';
+        detail = 'Vous maîtrisez bien le modèle de responsabilité partagée, le Well-Architected Framework et les concepts de résilience. Vous êtes prêt pour ces sujets à l\'examen SAA-C03.';
+      } else if (pct >= 60) {
+        color = '#f59e0b';
+        msg = '👍 Bon niveau — quelques points à consolider';
+        detail = 'Revoyez les distinctions HA vs FT, RTO vs RPO, et les nuances du modèle de responsabilité partagée selon le type de service (IaaS vs managé).';
+      } else {
+        color = '#ef4444';
+        msg = '📚 Des révisions s\'imposent';
+        detail = 'Reprenez les quatre cours : Shared Responsibility, Well-Architected Framework (6 piliers), Well-Architected Tool, et HA/FT/RTO/RPO. Ces concepts sont incontournables à l\'examen.';
+      }
+
+      // breakdown by chapter
+      var chapters = {};
+      for (var i = 0; i < questions.length; i++) {
+        var ch = questions[i].chapter;
+        if (!chapters[ch]) chapters[ch] = { total: 0 };
+        chapters[ch].total++;
+      }
+
+      var pillsHTML = '';
+      var chapterNames = ['Shared Responsibility', 'Well-Architected Framework', 'Well-Architected Tool', 'HA & Fault Tolerance'];
+      for (var c = 0; c < chapterNames.length; c++) {
+        var ch = chapterNames[c];
+        if (chapters[ch]) {
+          pillsHTML += '<span class="score-pill">' + ch + ' · ' + chapters[ch].total + ' q</span>';
+        }
+      }
+
+      var html =
+        '<div class="score-screen">' +
+          '<div style="font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);background:#eaf3ff;display:inline-block;padding:4px 12px;border-radius:20px;margin-bottom:12px;">Résultats finaux</div>' +
+          '<div class="score-big">' + score + '/' + questions.length + '</div>' +
+          '<div class="score-sub">' + pct + '% de bonnes réponses</div>' +
+          '<div class="score-bar-wrap"><div class="score-bar-fill" id="scoreFill" style="width:0%;background:' + color + '"></div></div>' +
+          '<div class="score-msg">' + msg + '</div>' +
+          '<div class="score-detail">' + detail + '</div>' +
+          '<div class="score-breakdown">' + pillsHTML + '</div>' +
+          '<div class="divider"></div>' +
+          '<button class="btn btn-primary" onclick="recommencer()">↺ Recommencer le QCM</button>' +
+        '</div>';
+
+      document.getElementById('card').innerHTML = html;
+
+      setTimeout(function() {
+        var fill = document.getElementById('scoreFill');
+        if (fill) fill.style.width = pct + '%';
+      }, 100);
+    }
+
+    function recommencer() {
+      qIdx = 0;
+      selected = [];
+      answered = false;
+      score = 0;
+      paint();
+    }
+
+    paint();
+</script>
+</body>
+</html>

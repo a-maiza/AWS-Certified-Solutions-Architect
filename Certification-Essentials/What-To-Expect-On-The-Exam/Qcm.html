@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM AWS – Guide de l'examen SAA-C03 & Réservation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #f5f5f3;
+          --card: #ffffff;
+          --blue: #378ADD;
+          --blue-dark: #2567b8;
+          --green: #22c55e;
+          --green-light: #dcfce7;
+          --red: #ef4444;
+          --red-light: #fee2e2;
+          --border: #e2e2de;
+          --text: #1a1a1a;
+          --muted: #6b7280;
+          --mono: 'IBM Plex Mono', monospace;
+          --sans: 'Sora', system-ui, sans-serif;
+        }
+
+        body {
+          font-family: var(--sans);
+          background: var(--bg);
+          color: var(--text);
+          min-height: 100vh;
+          padding: 32px 16px 64px;
+        }
+
+        .header { text-align: center; margin-bottom: 32px; }
+
+        .header .eyebrow {
+          font-family: var(--mono);
+          font-size: 11px;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: var(--blue);
+          background: #eaf3ff;
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 20px;
+          margin-bottom: 12px;
+        }
+
+        .header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text); line-height: 1.25; }
+        .header p { color: var(--muted); font-size: 0.875rem; margin-top: 6px; }
+
+        .topics {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .topic-tag {
+          font-family: var(--mono);
+          font-size: 10px;
+          letter-spacing: 0.05em;
+          padding: 3px 10px;
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          background: #fafaf8;
+        }
+
+        .card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          max-width: 760px;
+          margin: 0 auto;
+          padding: 32px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+
+        .progress-bar-bg { flex: 1; height: 6px; background: #e9e9e6; border-radius: 99px; overflow: hidden; }
+
+        .progress-bar-fill { height: 100%; background: var(--blue); border-radius: 99px; transition: width 0.4s ease; }
+
+        .progress-label { font-family: var(--mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--mono);
+          font-size: 11px;
+          letter-spacing: 0.05em;
+          padding: 4px 10px;
+          border-radius: 6px;
+          margin-bottom: 6px;
+          font-weight: 600;
+        }
+
+        .badge.single { background: #fff7ed; color: #c2510a; border: 1px solid #fed7aa; }
+        .badge.multiple { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+        .badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+        .chapter-tag {
+          display: inline-block;
+          font-family: var(--mono);
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 2px 8px;
+          border-radius: 4px;
+          margin-bottom: 10px;
+          margin-left: 8px;
+          background: #fdf4ff;
+          color: #7e22ce;
+          border: 1px solid #e9d5ff;
+        }
+
+        .question-num { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+        .question-text { font-size: 1.03rem; font-weight: 600; line-height: 1.6; margin-bottom: 22px; color: var(--text); }
+
+        .options { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 13px 16px;
+          border: 1.5px solid var(--border);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s;
+          background: #fafafa;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        .option:hover:not(.disabled) { border-color: var(--blue); background: #f0f7ff; }
+        .option.selected { border-color: var(--blue); background: #eaf3ff; }
+
+        .option .letter {
+          font-family: var(--mono);
+          font-weight: 600;
+          font-size: 12px;
+          color: var(--muted);
+          background: #f0f0ed;
+          border-radius: 5px;
+          min-width: 26px;
+          height: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: background 0.15s, color 0.15s;
+        }
+
+        .option.selected .letter { background: var(--blue); color: #fff; }
+        .option.correct { border-color: var(--green); background: var(--green-light); }
+        .option.correct .letter { background: var(--green); color: #fff; }
+        .option.wrong { border-color: var(--red); background: var(--red-light); }
+        .option.wrong .letter { background: var(--red); color: #fff; }
+        .option.missed { border-color: var(--green); background: #f0fdf4; border-style: dashed; }
+        .option.missed .letter { background: #86efac; color: #166534; }
+        .option.disabled { cursor: default; }
+
+        .actions { display: flex; gap: 12px; margin-top: 24px; align-items: center; }
+
+        .btn {
+          padding: 11px 22px;
+          border: none;
+          border-radius: 8px;
+          font-family: var(--sans);
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background 0.15s, transform 0.1s, opacity 0.15s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .explanation {
+          margin-top: 20px;
+          padding: 16px 18px;
+          background: #f8f8f6;
+          border-left: 3px solid var(--blue);
+          border-radius: 0 8px 8px 0;
+          font-size: 0.875rem;
+          line-height: 1.7;
+          color: #333;
+          display: none;
+        }
+
+        .explanation.show { display: block; }
+        .explanation strong { color: var(--blue-dark); }
+
+        /* domaine weight pills dans les explications */
+        .w-pill {
+          display: inline-block;
+          font-family: var(--mono);
+          font-size: 10px;
+          padding: 1px 7px;
+          border-radius: 4px;
+          margin: 0 2px;
+          background: #eaf3ff;
+          color: var(--blue-dark);
+          border: 1px solid #bfdbfe;
+        }
+
+        /* Score */
+        .score-screen { text-align: center; }
+        .score-big { font-size: 4rem; font-weight: 700; font-family: var(--mono); color: var(--blue); line-height: 1; margin: 16px 0 4px; }
+        .score-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+
+        .score-bar-wrap { background: #e9e9e6; border-radius: 99px; height: 12px; overflow: hidden; margin: 0 auto 24px; max-width: 420px; }
+        .score-bar-fill { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+
+        .score-msg { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .score-detail { font-size: 0.875rem; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+        .domains-recap {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+          margin-bottom: 24px;
+          text-align: left;
+        }
+
+        .domain-card {
+          background: #fafaf8;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 12px 14px;
+        }
+
+        .domain-card .d-name { font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+        .domain-card .d-weight { font-family: var(--mono); font-size: 11px; color: var(--blue); }
+
+        .score-breakdown { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+        .score-pill { font-family: var(--mono); font-size: 11px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); background: #fafaf8; }
+
+        .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+        @media (max-width: 520px) {
+          .card { padding: 20px 14px; }
+          .header h1 { font-size: 1.2rem; }
+          .score-big { font-size: 3rem; }
+          .domains-recap { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="eyebrow">AWS SAA-C03 · Examen</div>
+    <h1>Guide de l'examen, Domaines &amp; Réservation</h1>
+    <p>14 questions · Niveau intermédiaire à avancé</p>
+    <div class="topics">
+        <span class="topic-tag">Structure de l'examen</span>
+        <span class="topic-tag">4 domaines</span>
+        <span class="topic-tag">Score de passage</span>
+        <span class="topic-tag">Stratégies</span>
+        <span class="topic-tag">OnVUE vs centre</span>
+        <span class="topic-tag">Réservation</span>
+    </div>
+</div>
+
+<div class="card" id="card"></div>
+
+<script>
+    var questions = [
+      // ── Structure de l'examen ─────────────────────────────────────────────
+      {
+        chapter: "Structure de l'examen",
+        q: "Combien de questions comporte l'examen AWS SAA-C03, et quelle est la particularité de certaines d'entre elles ?",
+        type: "single",
+        opts: [
+          "50 questions, toutes notées de façon égale",
+          "65 questions, dont 15 non notées indistinguables des autres",
+          "75 questions, dont 10 questions bonus optionnelles en fin d'examen",
+          "65 questions, dont les 15 dernières sont toujours non notées"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> L'examen SAA-C03 contient 65 questions au total, dont 15 questions dites « non notées » ou « de prétest » qu'AWS utilise pour calibrer de futures versions de l'examen. Ces 15 questions sont indistinguables des 50 questions notées — il est donc impératif de traiter chaque question avec le même sérieux."
+      },
+      {
+        chapter: "Structure de l'examen",
+        q: "Quel est le score minimum requis pour réussir l'examen AWS SAA-C03 ?",
+        type: "single",
+        opts: [
+          "700 / 1000",
+          "750 / 1000",
+          "720 / 1000",
+          "800 / 1000"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C — 720/1000.</strong> Le score de passage de l'examen SAA-C03 est de 720 sur 1000. Il s'agit d'un score pondéré (scaled score) : chaque question n'a pas le même poids, et les questions difficiles rapportent davantage. Un score inférieur à 720 signifie un échec, quelle que soit la répartition des bonnes réponses."
+      },
+      {
+        chapter: "Structure de l'examen",
+        q: "Quelles affirmations sur la durée et le format de l'examen SAA-C03 sont correctes ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "La durée de base est de 130 minutes",
+          "Les candidats dont l'anglais est la langue étrangère peuvent bénéficier de 30 minutes supplémentaires",
+          "L'examen ne contient que des QCM à réponse unique",
+          "La durée de base est de 180 minutes",
+          "Les questions à réponses multiples (QRM) précisent toujours combien de réponses sélectionner"
+        ],
+        correct: [0, 1],
+        expl: "<strong>Réponses A et B.</strong> La durée standard est de 130 minutes (2h10). Les candidats dont l'anglais n'est pas la langue maternelle peuvent demander 30 minutes supplémentaires lors de l'inscription (ESL +30 min), portant le total à 160 minutes. L'examen contient à la fois des QCM (1 réponse) et des QRM (2+ réponses) — les QRM indiquent le nombre de réponses attendues dans l'énoncé."
+      },
+      {
+        chapter: "Structure de l'examen",
+        q: "Quelle expérience préalable AWS recommande-t-elle avant de passer l'examen SAA-C03 ?",
+        type: "single",
+        opts: [
+          "6 mois en tant qu'administrateur système Linux",
+          "1 an de pratique AWS avec une exposition aux workloads cloud",
+          "2 ans d'expérience en développement logiciel",
+          "Aucune expérience préalable n'est requise pour ce niveau Associate"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> AWS recommande au moins 1 an d'expérience pratique avec AWS avant de passer la certification SAA-C03. Cette expérience inclut la conception et le déploiement de solutions sur AWS, l'exposition aux services clés (EC2, S3, RDS, VPC, IAM, etc.) et une compréhension des bonnes pratiques d'architecture."
+      },
+
+      // ── Les 4 domaines ────────────────────────────────────────────────────
+      {
+        chapter: "Domaines de l'examen",
+        q: "Quel est le domaine le plus pondéré de l'examen SAA-C03 et quel pourcentage représente-t-il ?",
+        type: "single",
+        opts: [
+          "Designing Resilient Architectures — 30%",
+          "Designing Secure Architectures — 30%",
+          "Designing High-Performing Architectures — 30%",
+          "Designing Cost-Optimized Architectures — 30%"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Le domaine 1 « Designing Secure Architectures » est le plus important avec 30% des questions. Viennent ensuite : Resilient Architectures (26%), High-Performing Architectures (24%) et Cost-Optimized Architectures (20%). La sécurité étant omniprésente dans AWS, ce domaine couvre IAM, le chiffrement, la sécurité réseau et la protection des données."
+      },
+      {
+        chapter: "Domaines de l'examen",
+        q: "Classez les 4 domaines de l'examen SAA-C03 du plus pondéré au moins pondéré.",
+        type: "single",
+        opts: [
+          "Secure (30%) → Resilient (26%) → High-Performing (24%) → Cost-Optimized (20%)",
+          "Resilient (30%) → Secure (26%) → High-Performing (24%) → Cost-Optimized (20%)",
+          "Secure (30%) → High-Performing (26%) → Resilient (24%) → Cost-Optimized (20%)",
+          "Cost-Optimized (30%) → Secure (26%) → Resilient (24%) → High-Performing (20%)"
+        ],
+        correct: [0],
+        expl: "<strong>Réponse A.</strong> L'ordre exact est : (1) Secure Architectures 30%, (2) Resilient Architectures 26%, (3) High-Performing Architectures 24%, (4) Cost-Optimized Architectures 20%. Ces pourcentages indiquent le poids relatif des questions dans l'examen. La sécurité et la résilience représentent à elles seules 56% de l'examen."
+      },
+      {
+        chapter: "Domaines de l'examen",
+        q: "Quels sujets relèvent du domaine « Designing Resilient Architectures » ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "Architectures scalables et faiblement couplées (microservices indépendants)",
+          "Choix du bon type d'instance EC2 pour les workloads de calcul intensif",
+          "Architectures hautement disponibles et/ou tolérantes aux pannes",
+          "Optimisation du stockage froid pour les données rarement accédées",
+          "Chiffrement des données au repos et en transit"
+        ],
+        correct: [0, 2],
+        expl: "<strong>Réponses A et C.</strong> Le domaine Resilient Architectures (26%) porte sur deux grandes catégories : (1) les architectures scalables et faiblement couplées — découpler les composants via des files de messages, microservices indépendants, etc. — et (2) les architectures HA/Fault Tolerant — multi-AZ, failover automatique, Aurora Global. Le choix d'instance (B) relève de High-Performing, le stockage froid (D) de Cost-Optimized, et le chiffrement (E) de Secure."
+      },
+      {
+        chapter: "Domaines de l'examen",
+        q: "Un scénario d'examen décrit une base de données SQL existante migrée vers AWS, avec un besoin de haute disponibilité automatique et sans gestion de l'OS. Dans quel domaine ce scénario s'inscrit-il principalement ?",
+        type: "single",
+        opts: [
+          "Designing Secure Architectures",
+          "Designing Cost-Optimized Architectures",
+          "Designing High-Performing Architectures",
+          "Designing Resilient Architectures"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C — High-Performing Architectures.</strong> Le choix de la base de données adaptée (SQL managé = Amazon RDS ou Aurora vs NoSQL = DynamoDB) fait partie du domaine High-Performing Architectures (24%). La mention « sans gestion de l'OS » oriente vers un service managé. Si la question portait uniquement sur la HA/failover automatique, le domaine Resilient serait plus pertinent — mais le contexte 'base de données adaptée au workload' pointe vers High-Performing."
+      },
+      {
+        chapter: "Domaines de l'examen",
+        q: "Quels éléments relèvent du domaine « Designing Cost-Optimized Architectures » ? (Choisissez 3)",
+        type: "multiple",
+        opts: [
+          "Utilisation du stockage froid (ex. S3 Glacier) pour les données rarement accédées",
+          "Dimensionnement correct des instances et utilisation de l'auto-scaling",
+          "Chiffrement des communications réseau avec TLS",
+          "Optimisation des coûts réseau via VPC peering vs passerelle NAT",
+          "Traçabilité des accès via AWS CloudTrail"
+        ],
+        correct: [0, 1, 3],
+        expl: "<strong>Réponses A, B et D.</strong> Le domaine Cost-Optimized (20%) couvre : le stockage optimisé (S3 Glacier, S3 Intelligent-Tiering pour données froides), le calcul et les DB optimisés (bonne taille d'instance, Reserved Instances, Spot, auto-scaling), et le réseau économique (VPC peering moins coûteux que les passerelles NAT pour trafic inter-VPC). Le chiffrement TLS (C) relève de Secure, CloudTrail (E) également."
+      },
+
+      // ── Stratégies & Méthodes ─────────────────────────────────────────────
+      {
+        chapter: "Stratégies d'examen",
+        q: "Lors de l'examen, un candidat rencontre une question difficile à laquelle il ne connaît pas la réponse avec certitude. Quelle est la meilleure stratégie ?",
+        type: "single",
+        opts: [
+          "Passer la question sans répondre et y revenir uniquement si le temps le permet",
+          "Choisir aléatoirement une réponse et passer à la suivante sans la marquer",
+          "Répondre au mieux, flaguer la question pour la revoir à la fin, et continuer",
+          "Rester sur la question jusqu'à être certain, même si cela dépasse 5 minutes"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> La stratégie recommandée est de toujours répondre à chaque question (il n'y a pas de pénalité pour une mauvaise réponse dans l'examen AWS), de flaguer les questions incertaines pour les revoir à la fin, et de continuer. Ne jamais laisser une question sans réponse — une réponse au hasard vaut mieux que rien. Bloquer sur une question difficile fait perdre un temps précieux sur les autres."
+      },
+      {
+        chapter: "Stratégies d'examen",
+        q: "Comment les mots-clés dans les scénarios d'examen doivent-ils être utilisés ? Quel exemple illustre cette technique ?",
+        type: "single",
+        opts: [
+          "Ils ne sont pas fiables car AWS utilise souvent des pièges sémantiques délibérés",
+          "Repérer un mot-clé comme 'NoSQL' permet d'éliminer immédiatement les options RDS et Aurora",
+          "Les mots-clés ne s'appliquent qu'aux questions du domaine Security",
+          "Les mots-clés sont utiles uniquement pour les questions à réponses multiples"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> La technique des mots-clés est fondamentale pour l'examen SAA-C03. Par exemple : « NoSQL » → éliminer RDS/Aurora et chercher DynamoDB ; « serverless » → Lambda, Fargate, Aurora Serverless ; « faible latence mondiale » → CloudFront, Global Accelerator ; « données rarement accédées » → S3 Glacier. Cette élimination rapide des distracteurs évidents augmente la probabilité de bonne réponse même en cas d'incertitude."
+      },
+
+      // ── Réservation & Logistique ──────────────────────────────────────────
+      {
+        chapter: "Réservation de l'examen",
+        q: "Via quelle plateforme doit-on réserver l'examen AWS SAA-C03 ?",
+        type: "single",
+        opts: [
+          "pearsonvue.com directement",
+          "aws.amazon.com/certification",
+          "aws.training → Certification → Schedule an exam",
+          "certmetrics.com/amazon"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> La réservation officielle se fait via <strong>aws.training</strong>, dans la section Certification > Schedule an exam. Un compte AWS Builder ID est nécessaire (à créer si absent). L'activation du MFA sur ce compte est recommandée pour la sécurité. Pearson VUE est le prestataire tiers gérant les centres de test, mais la réservation initiale se fait bien via aws.training."
+      },
+      {
+        chapter: "Réservation de l'examen",
+        q: "Quelles affirmations sur le passage en ligne (OnVUE) sont correctes ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "Aucun équipement spécifique n'est requis — le son et la vidéo sont optionnels",
+          "Le bureau doit être entièrement dégagé et un seul écran autorisé",
+          "Le passage en centre de test est recommandé pour éviter les complications techniques",
+          "Le passage en ligne offre plus de flexibilité sans aucune contrainte d'environnement",
+          "Le proctor en ligne surveille uniquement l'écran, pas la vidéo"
+        ],
+        correct: [1, 2],
+        expl: "<strong>Réponses B et C.</strong> Le passage OnVUE impose des contraintes strictes : bureau entièrement dégagé, un seul moniteur, caméra et micro obligatoires, enregistrement vidéo/audio/écran. Le passage en <strong>centre de test est recommandé</strong> : environnement standardisé, matériel dédié, proctor sur place, moins de risques de problèmes techniques. OnVUE est pratique si aucun centre n'est accessible, mais les exigences environnementales sont contraignantes."
+      },
+      {
+        chapter: "Réservation de l'examen",
+        q: "Un candidat francophone s'inscrit à l'examen en anglais. Quelle option doit-il activer lors de la réservation et quel en est l'impact ?",
+        type: "single",
+        opts: [
+          "Demander un dictionnaire bilingue — autorisé pour les candidats non anglophones",
+          "Sélectionner la langue française pour passer l'examen en français",
+          "Demander l'ESL Accommodation (+30 min) pour bénéficier de 30 minutes supplémentaires",
+          "Choisir un proctor francophone — cela n'affecte pas la durée de l'examen"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> L'option ESL (English as a Second Language) doit être demandée au moment de la réservation. Elle accorde 30 minutes supplémentaires, portant la durée totale de 130 à 160 minutes. Cette accommodation est disponible pour les candidats dont l'anglais n'est pas la langue maternelle. Il n'est pas possible de changer de langue pendant la réservation une fois l'examen commencé."
+      }
+    ];
+
+    var qIdx = 0;
+    var selected = [];
+    var answered = false;
+    var score = 0;
+
+    function paint() {
+      var q = questions[qIdx];
+      var letters = ['A','B','C','D','E'];
+      var isMultiple = q.type === 'multiple';
+      var progressPct = Math.round((qIdx / questions.length) * 100);
+
+      var optsHTML = '';
+      for (var i = 0; i < q.opts.length; i++) {
+        optsHTML += '<div class="option" id="opt' + i + '" onclick="pickOption(' + i + ')">' +
+          '<span class="letter">' + letters[i] + '</span>' +
+          '<span>' + q.opts[i] + '</span>' +
+        '</div>';
+      }
+
+      var html =
+        '<div class="progress-wrap">' +
+          '<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + progressPct + '%"></div></div>' +
+          '<span class="progress-label">' + (qIdx + 1) + ' / ' + questions.length + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:12px;">' +
+          '<span class="badge ' + (isMultiple ? 'multiple' : 'single') + '">' +
+            (isMultiple ? 'Réponses multiples' : 'Réponse unique') +
+          '</span>' +
+          '<span class="chapter-tag">' + q.chapter + '</span>' +
+        '</div>' +
+        '<div class="question-num">Question ' + (qIdx + 1) + ' sur ' + questions.length + '</div>' +
+        '<div class="question-text">' + q.q + '</div>' +
+        '<div class="options">' + optsHTML + '</div>' +
+        '<div class="actions">' +
+          '<button class="btn btn-primary" id="btnValidate" onclick="valider()" disabled>Valider</button>' +
+          '<button class="btn btn-primary" id="btnNext" onclick="suivante()" style="display:none">Question suivante →</button>' +
+        '</div>' +
+        '<div class="explanation" id="expl"></div>';
+
+      document.getElementById('card').innerHTML = html;
+    }
+
+    function pickOption(idx) {
+      if (answered) return;
+      var q = questions[qIdx];
+      var isMultiple = q.type === 'multiple';
+
+      if (isMultiple) {
+        var pos = selected.indexOf(idx);
+        if (pos === -1) { selected.push(idx); } else { selected.splice(pos, 1); }
+      } else {
+        selected = [idx];
+      }
+
+      for (var i = 0; i < q.opts.length; i++) {
+        var el = document.getElementById('opt' + i);
+        el.className = selected.indexOf(i) !== -1 ? 'option selected' : 'option';
+      }
+
+      document.getElementById('btnValidate').disabled = selected.length === 0;
+    }
+
+    function valider() {
+      if (answered) return;
+      answered = true;
+
+      var q = questions[qIdx];
+      var correct = q.correct;
+
+      var isRight = true;
+      if (selected.length !== correct.length) {
+        isRight = false;
+      } else {
+        for (var i = 0; i < correct.length; i++) {
+          if (selected.indexOf(correct[i]) === -1) { isRight = false; break; }
+        }
+      }
+      if (isRight) score++;
+
+      for (var i = 0; i < q.opts.length; i++) {
+        var el = document.getElementById('opt' + i);
+        var isSel = selected.indexOf(i) !== -1;
+        var isCorr = correct.indexOf(i) !== -1;
+        if (isSel && isCorr) { el.className = 'option disabled correct'; }
+        else if (isSel && !isCorr) { el.className = 'option disabled wrong'; }
+        else if (!isSel && isCorr) { el.className = 'option disabled missed'; }
+        else { el.className = 'option disabled'; }
+      }
+
+      var expl = document.getElementById('expl');
+      expl.innerHTML = q.expl;
+      expl.className = 'explanation show';
+
+      document.getElementById('btnValidate').style.display = 'none';
+      document.getElementById('btnNext').style.display = 'inline-block';
+      if (qIdx === questions.length - 1) {
+        document.getElementById('btnNext').textContent = 'Voir le score →';
+      }
+    }
+
+    function suivante() {
+      qIdx++;
+      selected = [];
+      answered = false;
+      if (qIdx < questions.length) { paint(); } else { paintScore(); }
+    }
+
+    function paintScore() {
+      var pct = Math.round((score / questions.length) * 100);
+      var color, msg, detail;
+
+      if (pct >= 80) {
+        color = '#22c55e';
+        msg = '🎉 Excellent résultat !';
+        detail = 'Vous maîtrisez la structure de l\'examen SAA-C03, la répartition des domaines et les stratégies de passage. Vous abordez l\'examen avec les bonnes bases méthodologiques.';
+      } else if (pct >= 60) {
+        color = '#f59e0b';
+        msg = '👍 Bon niveau — quelques points à consolider';
+        detail = 'Revoyez les pondérations exactes des 4 domaines, le score de passage (720/1000), et les stratégies clés comme le flagging et l\'utilisation des mots-clés.';
+      } else {
+        color = '#ef4444';
+        msg = '📚 Des révisions s\'imposent';
+        detail = 'Reprenez le guide de l\'examen : structure (65 questions / 130 min / 720 pts), les 4 domaines et leur poids, et la procédure de réservation sur aws.training.';
+      }
+
+      var domainsHTML =
+        '<div class="domains-recap">' +
+          '<div class="domain-card"><div class="d-name">Secure Architectures</div><div class="d-weight">30% — 1er domaine</div></div>' +
+          '<div class="domain-card"><div class="d-name">Resilient Architectures</div><div class="d-weight">26% — 2e domaine</div></div>' +
+          '<div class="domain-card"><div class="d-name">High-Performing Arch.</div><div class="d-weight">24% — 3e domaine</div></div>' +
+          '<div class="domain-card"><div class="d-name">Cost-Optimized Arch.</div><div class="d-weight">20% — 4e domaine</div></div>' +
+        '</div>';
+
+      var html =
+        '<div class="score-screen">' +
+          '<div style="font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);background:#eaf3ff;display:inline-block;padding:4px 12px;border-radius:20px;margin-bottom:12px;">Résultats finaux</div>' +
+          '<div class="score-big">' + score + '/' + questions.length + '</div>' +
+          '<div class="score-sub">' + pct + '% de bonnes réponses</div>' +
+          '<div class="score-bar-wrap"><div class="score-bar-fill" id="scoreFill" style="width:0%;background:' + color + '"></div></div>' +
+          '<div class="score-msg">' + msg + '</div>' +
+          '<div class="score-detail">' + detail + '</div>' +
+          domainsHTML +
+          '<div class="score-breakdown">' +
+            '<span class="score-pill">Structure · 4 q</span>' +
+            '<span class="score-pill">Domaines · 5 q</span>' +
+            '<span class="score-pill">Stratégies · 2 q</span>' +
+            '<span class="score-pill">Réservation · 3 q</span>' +
+          '</div>' +
+          '<div class="divider"></div>' +
+          '<button class="btn btn-primary" onclick="recommencer()">↺ Recommencer le QCM</button>' +
+        '</div>';
+
+      document.getElementById('card').innerHTML = html;
+
+      setTimeout(function() {
+        var fill = document.getElementById('scoreFill');
+        if (fill) fill.style.width = pct + '%';
+      }, 100);
+    }
+
+    function recommencer() {
+      qIdx = 0;
+      selected = [];
+      answered = false;
+      score = 0;
+      paint();
+    }
+
+    paint();
+</script>
+</body>
+</html>

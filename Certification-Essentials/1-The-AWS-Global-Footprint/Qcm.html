@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM AWS – Régions, AZ & Edge Locations</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #f5f5f3;
+          --card: #ffffff;
+          --blue: #378ADD;
+          --blue-dark: #2567b8;
+          --green: #22c55e;
+          --green-light: #dcfce7;
+          --red: #ef4444;
+          --red-light: #fee2e2;
+          --border: #e2e2de;
+          --text: #1a1a1a;
+          --muted: #6b7280;
+          --mono: 'IBM Plex Mono', monospace;
+          --sans: 'Sora', system-ui, sans-serif;
+        }
+
+        body {
+          font-family: var(--sans);
+          background: var(--bg);
+          color: var(--text);
+          min-height: 100vh;
+          padding: 32px 16px 64px;
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 32px;
+        }
+
+        .header .eyebrow {
+          font-family: var(--mono);
+          font-size: 11px;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: var(--blue);
+          background: #eaf3ff;
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 20px;
+          margin-bottom: 12px;
+        }
+
+        .header h1 {
+          font-size: 1.6rem;
+          font-weight: 700;
+          color: var(--text);
+          line-height: 1.2;
+        }
+
+        .header p {
+          color: var(--muted);
+          font-size: 0.875rem;
+          margin-top: 6px;
+        }
+
+        .card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          max-width: 740px;
+          margin: 0 auto;
+          padding: 32px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Progress bar */
+        .progress-wrap {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 28px;
+        }
+
+        .progress-bar-bg {
+          flex: 1;
+          height: 6px;
+          background: #e9e9e6;
+          border-radius: 99px;
+          overflow: hidden;
+        }
+
+        .progress-bar-fill {
+          height: 100%;
+          background: var(--blue);
+          border-radius: 99px;
+          transition: width 0.4s ease;
+        }
+
+        .progress-label {
+          font-family: var(--mono);
+          font-size: 12px;
+          color: var(--muted);
+          white-space: nowrap;
+        }
+
+        /* Badge */
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--mono);
+          font-size: 11px;
+          letter-spacing: 0.05em;
+          padding: 4px 10px;
+          border-radius: 6px;
+          margin-bottom: 14px;
+          font-weight: 600;
+        }
+
+        .badge.single { background: #fff7ed; color: #c2510a; border: 1px solid #fed7aa; }
+        .badge.multiple { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+
+        .badge::before {
+          content: '';
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: currentColor;
+        }
+
+        /* Question */
+        .question-num {
+          font-family: var(--mono);
+          font-size: 11px;
+          color: var(--muted);
+          margin-bottom: 8px;
+        }
+
+        .question-text {
+          font-size: 1.05rem;
+          font-weight: 600;
+          line-height: 1.55;
+          margin-bottom: 22px;
+          color: var(--text);
+        }
+
+        /* Options */
+        .options { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 13px 16px;
+          border: 1.5px solid var(--border);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s;
+          background: #fafafa;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        .option:hover:not(.disabled) { border-color: var(--blue); background: #f0f7ff; }
+
+        .option.selected { border-color: var(--blue); background: #eaf3ff; }
+
+        .option .letter {
+          font-family: var(--mono);
+          font-weight: 600;
+          font-size: 12px;
+          color: var(--muted);
+          background: #f0f0ed;
+          border-radius: 5px;
+          min-width: 26px;
+          height: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: background 0.15s, color 0.15s;
+        }
+
+        .option.selected .letter { background: var(--blue); color: #fff; }
+
+        /* Correction states */
+        .option.correct {
+          border-color: var(--green);
+          background: var(--green-light);
+        }
+        .option.correct .letter { background: var(--green); color: #fff; }
+
+        .option.wrong {
+          border-color: var(--red);
+          background: var(--red-light);
+        }
+        .option.wrong .letter { background: var(--red); color: #fff; }
+
+        .option.missed {
+          border-color: var(--green);
+          background: #f0fdf4;
+          border-style: dashed;
+        }
+        .option.missed .letter { background: #86efac; color: #166534; }
+
+        .option.disabled { cursor: default; }
+
+        /* Actions */
+        .actions {
+          display: flex;
+          gap: 12px;
+          margin-top: 24px;
+          align-items: center;
+        }
+
+        .btn {
+          padding: 11px 22px;
+          border: none;
+          border-radius: 8px;
+          font-family: var(--sans);
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background 0.15s, transform 0.1s, opacity 0.15s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+
+        .btn-primary {
+          background: var(--blue);
+          color: #fff;
+        }
+        .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-ghost {
+          background: transparent;
+          color: var(--muted);
+          border: 1.5px solid var(--border);
+        }
+        .btn-ghost:hover { background: #f0f0ed; }
+
+        /* Explanation */
+        .explanation {
+          margin-top: 20px;
+          padding: 16px 18px;
+          background: #f8f8f6;
+          border-left: 3px solid var(--blue);
+          border-radius: 0 8px 8px 0;
+          font-size: 0.875rem;
+          line-height: 1.65;
+          color: #333;
+          display: none;
+        }
+
+        .explanation.show { display: block; }
+
+        .explanation strong { color: var(--blue); }
+
+        /* Score screen */
+        .score-screen { text-align: center; }
+
+        .score-screen .score-big {
+          font-size: 4rem;
+          font-weight: 700;
+          font-family: var(--mono);
+          color: var(--blue);
+          line-height: 1;
+          margin: 16px 0 4px;
+        }
+
+        .score-screen .score-sub {
+          color: var(--muted);
+          font-size: 0.9rem;
+          margin-bottom: 24px;
+        }
+
+        .score-bar-wrap {
+          background: #e9e9e6;
+          border-radius: 99px;
+          height: 12px;
+          overflow: hidden;
+          margin: 0 auto 24px;
+          max-width: 400px;
+        }
+
+        .score-bar-fill {
+          height: 100%;
+          border-radius: 99px;
+          transition: width 1s cubic-bezier(.4,0,.2,1);
+        }
+
+        .score-msg {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+
+        .score-detail {
+          font-size: 0.875rem;
+          color: var(--muted);
+          margin-bottom: 28px;
+        }
+
+        .divider {
+          height: 1px;
+          background: var(--border);
+          margin: 24px 0;
+        }
+
+        @media (max-width: 500px) {
+          .card { padding: 20px 16px; }
+          .header h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="eyebrow">AWS SAA-C03</div>
+    <h1>Régions, Zones de Disponibilité &amp; Edge Locations</h1>
+    <p>15 questions · Niveau intermédiaire à avancé</p>
+</div>
+
+<div class="card" id="card">
+    <!-- Dynamically filled -->
+</div>
+
+<script>
+    var questions = [
+      {
+        q: "Pourquoi AWS recommande-t-il de déployer une application sur au moins 3 zones de disponibilité (AZ) plutôt que 2 ?",
+        type: "single",
+        opts: [
+          "Pour réduire les coûts de transfert inter-AZ",
+          "Pour tolérer la perte d'une AZ tout en maintenant la disponibilité sur les deux restantes, sans dépendre d'une seule AZ de secours",
+          "Parce que les services managés AWS n'acceptent que 3 AZ ou plus",
+          "Pour répondre à l'exigence minimale du SLA d'AWS sur EC2"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Avec 2 AZ, la perte d'une AZ laisse une seule AZ pour absorber tout le trafic, ce qui peut causer une surcharge ou un point de défaillance unique. Avec 3 AZ, la perte d'une laisse 2 AZ opérationnelles pour garantir la haute disponibilité. AWS recommande ce modèle comme bonne pratique d'architecture résiliente."
+      },
+      {
+        q: "Une équipe utilise deux comptes AWS distincts et souhaite déployer des ressources dans exactement les mêmes data centers physiques pour une communication à faible latence. Quelle approche est correcte ?",
+        type: "single",
+        opts: [
+          "Utiliser le même nom logique d'AZ dans les deux comptes (ex. : us-west-2b)",
+          "Utiliser l'AZ ID (ex. : usw2-az1) qui est un identifiant physique constant entre les comptes",
+          "Choisir la même région suffit, les AZ sont identiques entre comptes",
+          "Activer le VPC peering entre les deux comptes pour ignorer les AZ"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Le nom logique d'une AZ (us-west-2b) est mappé aléatoirement par AWS pour chaque compte afin d'équilibrer la charge. Ainsi, us-west-2b dans le compte A peut pointer vers des data centers différents de us-west-2b dans le compte B. L'AZ ID (usw2-az1) est l'identifiant physique fixe, identique quel que soit le compte."
+      },
+      {
+        q: "Quels éléments sont isolés au niveau de chaque zone de disponibilité (AZ) ? (Choisissez 3)",
+        type: "multiple",
+        opts: [
+          "Alimentation électrique redondante",
+          "Réseau propre et indépendant",
+          "Service IAM global d'AWS",
+          "Connectivité à faible latence vers les autres AZ de la même région",
+          "Tarification spécifique par AZ pour EC2"
+        ],
+        correct: [0, 1, 3],
+        expl: "<strong>Réponses A, B, D.</strong> Chaque AZ dispose de sa propre alimentation redondante, de son réseau indépendant, et est connectée aux autres AZ de la région via des liens à faible latence. IAM est un service global AWS, non spécifique à une AZ. La tarification EC2 peut varier par région mais pas par AZ individuelle."
+      },
+      {
+        q: "Quelle est la principale différence entre une région AWS et une zone de disponibilité (AZ) ?",
+        type: "single",
+        opts: [
+          "Une région est un data center unique, une AZ regroupe plusieurs régions",
+          "Une région est une zone géographique distincte contenant plusieurs AZ isolées ; une AZ est un emplacement physique indépendant au sein d'une région",
+          "Les régions sont utilisées pour les services managés, les AZ pour les services non managés",
+          "Une AZ correspond à un pays entier, une région à une ville"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Une région AWS est une zone géographique complète (ex. : us-west-2 = Oregon) contenant au minimum 3 AZ. Chaque AZ est un emplacement physiquement isolé au sein de cette région, conçu pour résister aux pannes locales. Les AZ d'une même région sont interconnectées à faible latence."
+      },
+      {
+        q: "Une entreprise déploie une application critique dans la région us-west-2. Elle observe que us-west-2 contient 4 AZ. Quelle affirmation est vraie ?",
+        type: "single",
+        opts: [
+          "Les 4 AZ sont hébergées dans le même bâtiment pour optimiser la latence",
+          "us-west-2d est la plus récente et peut avoir une capacité limitée pour certains types d'instances",
+          "Toutes les AZ de us-west-2 partagent la même alimentation électrique",
+          "Les AZ supplémentaires d'une région augmentent automatiquement la réplication des données"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Dans les régions avec 4+ AZ (comme us-west-2 avec us-west-2a/b/c/d), la 4ème AZ est souvent plus récente. AWS peut ne pas supporter tous les types d'instances dans les AZ plus récentes. Il est important de vérifier la disponibilité des types d'instances selon les AZ avant de planifier une architecture."
+      },
+      {
+        q: "Quel service AWS s'appuie principalement sur les edge locations pour réduire la latence de livraison de contenu aux utilisateurs finaux ?",
+        type: "single",
+        opts: [
+          "AWS Direct Connect",
+          "Amazon CloudFront",
+          "Amazon RDS Multi-AZ",
+          "AWS Global Accelerator uniquement"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Amazon CloudFront est le CDN d'AWS qui utilise les edge locations (points de présence) pour mettre en cache le contenu statique et dynamique au plus proche des utilisateurs finaux. Cela réduit drastiquement la latence. AWS Global Accelerator utilise aussi le réseau AWS mais pour le routage de réseau, non le caching de contenu."
+      },
+      {
+        q: "Quelles affirmations sur les edge locations sont correctes ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "Les edge locations sont plus nombreuses que les régions AWS",
+          "Elles permettent de déployer des instances EC2 plus près des utilisateurs",
+          "Elles sont utilisées pour la mise en cache de contenu via des points de présence",
+          "Chaque edge location constitue une région AWS à part entière",
+          "Les edge locations nécessitent un VPC dédié pour fonctionner"
+        ],
+        correct: [0, 2],
+        expl: "<strong>Réponses A et C.</strong> AWS dispose de plus de 400 points de présence (edge locations + caches régionaux) répartis dans le monde, bien plus que les ~30 régions. Ces edge locations servent principalement à la mise en cache de contenu (CloudFront) pour rapprocher les données des utilisateurs. Elles ne permettent pas de lancer des EC2 ni ne constituent des régions à part entière."
+      },
+      {
+        q: "Un architecte doit choisir une région AWS pour déployer une application. Quels critères doit-il évaluer ? (Choisissez 3)",
+        type: "multiple",
+        opts: [
+          "Conformité réglementaire et résidence des données",
+          "Nombre d'edge locations dans la région",
+          "Proximité géographique des utilisateurs finaux pour minimiser la latence",
+          "Services AWS disponibles dans la région",
+          "Nombre de comptes AWS déjà créés dans cette région"
+        ],
+        correct: [0, 2, 3],
+        expl: "<strong>Réponses A, C et D.</strong> Le choix d'une région repose sur : (1) la conformité réglementaire (RGPD, HIPAA, résidence des données), (2) la proximité des utilisateurs pour réduire la latence, et (3) la disponibilité des services AWS nécessaires (tous les services ne sont pas disponibles dans toutes les régions). Le nombre d'edge locations ou de comptes n'est pas un critère de sélection de région."
+      },
+      {
+        q: "Dans quel scénario les régions AWS GovCloud sont-elles le plus susceptibles d'être requises ?",
+        type: "single",
+        opts: [
+          "Une startup SaaS qui souhaite optimiser ses coûts d'infrastructure",
+          "Une agence gouvernementale américaine devant respecter les réglementations ITAR/FedRAMP",
+          "Une entreprise européenne cherchant à se conformer au RGPD",
+          "Un service de streaming vidéo nécessitant une faible latence mondiale"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Les régions AWS GovCloud (us-gov-west-1, us-gov-east-1) sont conçues spécifiquement pour les workloads gouvernementaux américains sensibles, notamment ceux soumis aux réglementations ITAR (contrôle des exportations d'armement) et FedRAMP. L'accès est restreint aux entités américaines éligibles. Pour le RGPD, les régions européennes standard suffisent."
+      },
+      {
+        q: "Quelle déclaration décrit correctement l'AZ ID par rapport au nom logique d'une AZ ?",
+        type: "single",
+        opts: [
+          "L'AZ ID est un alias convivial créé par l'utilisateur pour identifier ses AZ favorites",
+          "Le nom logique (ex. us-east-1a) est constant entre tous les comptes AWS d'une même organisation",
+          "L'AZ ID (ex. use1-az1) est un identifiant physique fixe indépendant du compte AWS utilisé",
+          "L'AZ ID change à chaque déploiement d'infrastructure pour des raisons de sécurité"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> AWS mélange volontairement les noms logiques des AZ entre comptes pour distribuer la charge. Ainsi, us-east-1a dans un compte peut mapper vers use1-az2 physiquement, alors que dans un autre compte ce sera use1-az4. L'AZ ID est l'identifiant physique stable, essentiel pour aligner des ressources multi-comptes sur les mêmes infrastructures physiques."
+      },
+      {
+        q: "Qu'est-ce que le terme « multi-AZ » signifie dans le contexte d'une architecture AWS ?",
+        type: "single",
+        opts: [
+          "Un déploiement réparti sur au moins deux régions AWS différentes",
+          "Un déploiement utilisant deux zones de disponibilité ou plus au sein d'une même région",
+          "L'activation automatique des sauvegardes cross-région pour toutes les ressources",
+          "Un contrat de service garantissant 99,999% de disponibilité"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Le terme multi-AZ désigne spécifiquement un déploiement sur 2 AZ ou plus au sein d'une même région. C'est une bonne pratique fondamentale pour la haute disponibilité : si une AZ tombe, les ressources dans les autres AZ continuent de fonctionner. Ce terme est distinct de « multi-région » qui implique des régions différentes."
+      },
+      {
+        q: "Un architecte solutions examine la topologie réseau d'AWS. Quelles affirmations sur la connectivité entre AZ d'une même région sont vraies ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "Les AZ d'une même région sont interconnectées via des liens réseau dédiés à faible latence",
+          "Le trafic inter-AZ au sein d'une région transite toujours par l'internet public",
+          "La latence inter-AZ au sein d'une région est généralement de quelques millisecondes",
+          "Chaque AZ est entièrement déconnectée des autres pour une isolation totale",
+          "Le transfert de données entre AZ d'une même région est entièrement gratuit"
+        ],
+        correct: [0, 2],
+        expl: "<strong>Réponses A et C.</strong> AWS interconnecte les AZ d'une même région via son réseau privé backbone à haut débit et faible latence (typiquement <2ms entre AZ). Ce trafic ne passe pas par l'internet public. Attention : le transfert de données inter-AZ engendre des coûts de sortie réseau chez AWS (non gratuit), contrairement au trafic intra-AZ."
+      },
+      {
+        q: "Vous concevez une architecture de reprise après sinistre (DR) pour une application critique. Quelle option garantit la meilleure isolation face à une catastrophe naturelle (ex. tremblement de terre) ?",
+        type: "single",
+        opts: [
+          "Déploiement dans 3 AZ de la même région",
+          "Déploiement dans 2 AZ distantes de la même région avec réplication synchrone",
+          "Déploiement dans deux régions AWS distinctes géographiquement éloignées",
+          "Utilisation des edge locations comme sites de DR secondaires"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> Même si les AZ d'une région sont physiquement séparées, une catastrophe d'une ampleur extrême (ex. méga-séisme, coupure régionale d'internet) pourrait affecter toute une région. Pour une isolation maximale face aux catastrophes géographiques, un déploiement multi-région (régions distinctes sur des continents différents si besoin) est recommandé pour un DR de niveau RTO/RPO très bas."
+      },
+      {
+        q: "Quelle affirmation sur la disponibilité des services AWS selon les régions est correcte ?",
+        type: "single",
+        opts: [
+          "Tous les services AWS sont disponibles dans toutes les régions simultanément",
+          "Certains services AWS ne sont disponibles que dans certaines régions ; il faut vérifier avant de choisir une région",
+          "Les nouvelles fonctionnalités AWS sont d'abord déployées dans les régions GovCloud",
+          "Les services globaux comme IAM sont liés à une région spécifique"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> AWS n'offre pas tous ses services dans toutes ses régions. Les nouveaux services et fonctionnalités sont généralement lancés d'abord dans us-east-1 (N. Virginia), puis déployés progressivement. Avant de choisir une région, il est crucial de vérifier la disponibilité des services requis. IAM, Route 53 et CloudFront sont des services globaux non liés à une région."
+      },
+      {
+        q: "Dans le cadre d'une architecture Well-Architected AWS, quel pilier est principalement adressé par le déploiement multi-AZ ?",
+        type: "single",
+        opts: [
+          "Optimisation des coûts",
+          "Performance",
+          "Fiabilité (Reliability)",
+          "Durabilité (Sustainability)"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> Le pilier Fiabilité (Reliability) du AWS Well-Architected Framework vise à garantir qu'un système fonctionne correctement et se rétablit rapidement en cas de défaillance. Le déploiement multi-AZ est une implémentation directe de ce pilier : en distribuant les ressources sur plusieurs AZ, on élimine les points de défaillance uniques et on assure la continuité de service."
+      }
+    ];
+
+    var qIdx = 0;
+    var selected = [];
+    var answered = false;
+    var score = 0;
+
+    function paint() {
+      var q = questions[qIdx];
+      var letters = ['A','B','C','D','E'];
+      var isMultiple = q.type === 'multiple';
+      var progressPct = Math.round((qIdx / questions.length) * 100);
+
+      var optsHTML = '';
+      for (var i = 0; i < q.opts.length; i++) {
+        optsHTML += '<div class="option" id="opt' + i + '" onclick="pickOption(' + i + ')">' +
+          '<span class="letter">' + letters[i] + '</span>' +
+          '<span>' + q.opts[i] + '</span>' +
+        '</div>';
+      }
+
+      var html = '' +
+        '<div class="progress-wrap">' +
+          '<div class="progress-bar-bg"><div class="progress-bar-fill" id="pbar" style="width:' + progressPct + '%"></div></div>' +
+          '<span class="progress-label">' + (qIdx + 1) + ' / ' + questions.length + '</span>' +
+        '</div>' +
+        '<span class="badge ' + (isMultiple ? 'multiple' : 'single') + '">' +
+          (isMultiple ? 'Réponses multiples' : 'Réponse unique') +
+        '</span>' +
+        '<div class="question-num">Question ' + (qIdx + 1) + ' sur ' + questions.length + '</div>' +
+        '<div class="question-text">' + q.q + '</div>' +
+        '<div class="options">' + optsHTML + '</div>' +
+        '<div class="actions">' +
+          '<button class="btn btn-primary" id="btnValidate" onclick="valider()" disabled>Valider</button>' +
+          '<button class="btn btn-primary" id="btnNext" onclick="suivante()" style="display:none">Question suivante →</button>' +
+        '</div>' +
+        '<div class="explanation" id="expl"></div>';
+
+      document.getElementById('card').innerHTML = html;
+    }
+
+    function pickOption(idx) {
+      if (answered) return;
+      var q = questions[qIdx];
+      var isMultiple = q.type === 'multiple';
+
+      if (isMultiple) {
+        var pos = selected.indexOf(idx);
+        if (pos === -1) {
+          selected.push(idx);
+        } else {
+          selected.splice(pos, 1);
+        }
+      } else {
+        selected = [idx];
+      }
+
+      // update visual selection
+      for (var i = 0; i < q.opts.length; i++) {
+        var el = document.getElementById('opt' + i);
+        if (selected.indexOf(i) !== -1) {
+          el.className = 'option selected';
+        } else {
+          el.className = 'option';
+        }
+      }
+
+      document.getElementById('btnValidate').disabled = selected.length === 0;
+    }
+
+    function valider() {
+      if (answered) return;
+      answered = true;
+
+      var q = questions[qIdx];
+      var correct = q.correct;
+
+      // check correctness
+      var isRight = true;
+      if (selected.length !== correct.length) {
+        isRight = false;
+      } else {
+        for (var i = 0; i < correct.length; i++) {
+          if (selected.indexOf(correct[i]) === -1) { isRight = false; break; }
+        }
+      }
+      if (isRight) score++;
+
+      // apply visual states
+      for (var i = 0; i < q.opts.length; i++) {
+        var el = document.getElementById('opt' + i);
+        el.classList.add('disabled');
+        var isSelected = selected.indexOf(i) !== -1;
+        var isCorrect = correct.indexOf(i) !== -1;
+
+        if (isSelected && isCorrect) {
+          el.className = 'option disabled correct';
+        } else if (isSelected && !isCorrect) {
+          el.className = 'option disabled wrong';
+        } else if (!isSelected && isCorrect) {
+          el.className = 'option disabled missed';
+        } else {
+          el.className = 'option disabled';
+        }
+      }
+
+      // show explanation
+      var expl = document.getElementById('expl');
+      expl.innerHTML = q.expl;
+      expl.className = 'explanation show';
+
+      // swap buttons
+      document.getElementById('btnValidate').style.display = 'none';
+      document.getElementById('btnNext').style.display = 'inline-block';
+      if (qIdx === questions.length - 1) {
+        document.getElementById('btnNext').textContent = 'Voir le score →';
+      }
+    }
+
+    function suivante() {
+      qIdx++;
+      selected = [];
+      answered = false;
+      if (qIdx < questions.length) {
+        paint();
+      } else {
+        paintScore();
+      }
+    }
+
+    function paintScore() {
+      var pct = Math.round((score / questions.length) * 100);
+      var color, msg, detail;
+
+      if (pct >= 80) {
+        color = '#22c55e';
+        msg = '🎉 Excellent résultat !';
+        detail = 'Vous maîtrisez bien ce chapitre. Continuez à ce rythme pour décrocher la SAA-C03 !';
+      } else if (pct >= 60) {
+        color = '#f59e0b';
+        msg = '👍 Bon niveau, quelques points à revoir';
+        detail = 'Relisez les questions manquées, notamment sur l\'AZ ID et le multi-AZ.';
+      } else {
+        color = '#ef4444';
+        msg = '📚 Des révisions s\'imposent';
+        detail = 'Reprenez le cours sur les régions, les AZ et les edge locations avant de reprendre le QCM.';
+      }
+
+      var html = '' +
+        '<div class="score-screen">' +
+          '<div class="eyebrow" style="font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);background:#eaf3ff;display:inline-block;padding:4px 12px;border-radius:20px;margin-bottom:12px;">Résultats</div>' +
+          '<div class="score-big">' + score + '/' + questions.length + '</div>' +
+          '<div class="score-sub">' + pct + '% de bonnes réponses</div>' +
+          '<div class="score-bar-wrap"><div class="score-bar-fill" id="scoreFill" style="width:0%;background:' + color + '"></div></div>' +
+          '<div class="score-msg">' + msg + '</div>' +
+          '<div class="score-detail">' + detail + '</div>' +
+          '<div class="divider"></div>' +
+          '<button class="btn btn-primary" onclick="recommencer()">↺ Recommencer le QCM</button>' +
+        '</div>';
+
+      document.getElementById('card').innerHTML = html;
+
+      // animate score bar
+      setTimeout(function() {
+        var fill = document.getElementById('scoreFill');
+        if (fill) fill.style.width = pct + '%';
+      }, 100);
+    }
+
+    function recommencer() {
+      qIdx = 0;
+      selected = [];
+      answered = false;
+      score = 0;
+      paint();
+    }
+
+    // Init
+    paint();
+</script>
+</body>
+</html>

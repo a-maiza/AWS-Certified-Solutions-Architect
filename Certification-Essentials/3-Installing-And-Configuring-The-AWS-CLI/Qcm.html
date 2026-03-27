@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM AWS – AWS CLI : Installation & Configuration</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --bg: #f5f5f3;
+          --card: #ffffff;
+          --blue: #378ADD;
+          --blue-dark: #2567b8;
+          --green: #22c55e;
+          --green-light: #dcfce7;
+          --red: #ef4444;
+          --red-light: #fee2e2;
+          --border: #e2e2de;
+          --text: #1a1a1a;
+          --muted: #6b7280;
+          --mono: 'IBM Plex Mono', monospace;
+          --sans: 'Sora', system-ui, sans-serif;
+        }
+
+        body {
+          font-family: var(--sans);
+          background: var(--bg);
+          color: var(--text);
+          min-height: 100vh;
+          padding: 32px 16px 64px;
+        }
+
+        .header { text-align: center; margin-bottom: 32px; }
+
+        .header .eyebrow {
+          font-family: var(--mono);
+          font-size: 11px;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: var(--blue);
+          background: #eaf3ff;
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 20px;
+          margin-bottom: 12px;
+        }
+
+        .header h1 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--text);
+          line-height: 1.25;
+        }
+
+        .header p { color: var(--muted); font-size: 0.875rem; margin-top: 6px; }
+
+        .topics {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 8px;
+          margin-top: 14px;
+        }
+
+        .topic-tag {
+          font-family: var(--mono);
+          font-size: 10px;
+          letter-spacing: 0.05em;
+          padding: 3px 10px;
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          background: #fafaf8;
+        }
+
+        .card {
+          background: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          max-width: 760px;
+          margin: 0 auto;
+          padding: 32px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-wrap {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 28px;
+        }
+
+        .progress-bar-bg {
+          flex: 1;
+          height: 6px;
+          background: #e9e9e6;
+          border-radius: 99px;
+          overflow: hidden;
+        }
+
+        .progress-bar-fill {
+          height: 100%;
+          background: var(--blue);
+          border-radius: 99px;
+          transition: width 0.4s ease;
+        }
+
+        .progress-label {
+          font-family: var(--mono);
+          font-size: 12px;
+          color: var(--muted);
+          white-space: nowrap;
+        }
+
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-family: var(--mono);
+          font-size: 11px;
+          letter-spacing: 0.05em;
+          padding: 4px 10px;
+          border-radius: 6px;
+          margin-bottom: 6px;
+          font-weight: 600;
+        }
+
+        .badge.single { background: #fff7ed; color: #c2510a; border: 1px solid #fed7aa; }
+        .badge.multiple { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+        .badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+        .chapter-tag {
+          display: inline-block;
+          font-family: var(--mono);
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 2px 8px;
+          border-radius: 4px;
+          margin-bottom: 10px;
+          margin-left: 8px;
+          background: #f0fdf4;
+          color: #166534;
+          border: 1px solid #bbf7d0;
+        }
+
+        .question-num { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+        .question-text {
+          font-size: 1.03rem;
+          font-weight: 600;
+          line-height: 1.6;
+          margin-bottom: 22px;
+          color: var(--text);
+        }
+
+        /* Inline code in question text */
+        .question-text code, .option code {
+          font-family: var(--mono);
+          font-size: 0.85em;
+          background: #f0f0ed;
+          padding: 1px 6px;
+          border-radius: 4px;
+          color: #1e3a5f;
+          border: 1px solid #e0e0dc;
+        }
+
+        .options { display: flex; flex-direction: column; gap: 10px; }
+
+        .option {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 13px 16px;
+          border: 1.5px solid var(--border);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: border-color 0.15s, background 0.15s;
+          background: #fafafa;
+          font-size: 0.92rem;
+          line-height: 1.5;
+        }
+
+        .option:hover:not(.disabled) { border-color: var(--blue); background: #f0f7ff; }
+        .option.selected { border-color: var(--blue); background: #eaf3ff; }
+
+        .option .letter {
+          font-family: var(--mono);
+          font-weight: 600;
+          font-size: 12px;
+          color: var(--muted);
+          background: #f0f0ed;
+          border-radius: 5px;
+          min-width: 26px;
+          height: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          transition: background 0.15s, color 0.15s;
+        }
+
+        .option.selected .letter { background: var(--blue); color: #fff; }
+        .option.correct { border-color: var(--green); background: var(--green-light); }
+        .option.correct .letter { background: var(--green); color: #fff; }
+        .option.wrong { border-color: var(--red); background: var(--red-light); }
+        .option.wrong .letter { background: var(--red); color: #fff; }
+        .option.missed { border-color: var(--green); background: #f0fdf4; border-style: dashed; }
+        .option.missed .letter { background: #86efac; color: #166534; }
+        .option.disabled { cursor: default; }
+
+        .actions { display: flex; gap: 12px; margin-top: 24px; align-items: center; }
+
+        .btn {
+          padding: 11px 22px;
+          border: none;
+          border-radius: 8px;
+          font-family: var(--sans);
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background 0.15s, transform 0.1s, opacity 0.15s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--blue); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+        .btn-ghost:hover { background: #f0f0ed; }
+
+        .explanation {
+          margin-top: 20px;
+          padding: 16px 18px;
+          background: #f8f8f6;
+          border-left: 3px solid var(--blue);
+          border-radius: 0 8px 8px 0;
+          font-size: 0.875rem;
+          line-height: 1.7;
+          color: #333;
+          display: none;
+        }
+
+        .explanation.show { display: block; }
+        .explanation strong { color: var(--blue-dark); }
+        .explanation code {
+          font-family: var(--mono);
+          font-size: 0.85em;
+          background: #e8e8e5;
+          padding: 1px 6px;
+          border-radius: 4px;
+          color: #1e3a5f;
+          border: 1px solid #d8d8d4;
+        }
+
+        /* Score */
+        .score-screen { text-align: center; }
+        .score-big { font-size: 4rem; font-weight: 700; font-family: var(--mono); color: var(--blue); line-height: 1; margin: 16px 0 4px; }
+        .score-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+
+        .score-bar-wrap {
+          background: #e9e9e6;
+          border-radius: 99px;
+          height: 12px;
+          overflow: hidden;
+          margin: 0 auto 24px;
+          max-width: 420px;
+        }
+
+        .score-bar-fill { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+        .score-msg { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+        .score-detail { font-size: 0.875rem; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+
+        .score-breakdown { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; }
+        .score-pill { font-family: var(--mono); font-size: 11px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); background: #fafaf8; }
+
+        .divider { height: 1px; background: var(--border); margin: 24px 0; }
+
+        @media (max-width: 520px) {
+          .card { padding: 20px 14px; }
+          .header h1 { font-size: 1.2rem; }
+          .score-big { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="eyebrow">AWS SAA-C03 · Pratique</div>
+    <h1>AWS CLI — Installation, Configuration &amp; Authentification</h1>
+    <p>12 questions · Niveau intermédiaire à avancé</p>
+    <div class="topics">
+        <span class="topic-tag">AWS CLI v2</span>
+        <span class="topic-tag">aws configure</span>
+        <span class="topic-tag">Profils CLI</span>
+        <span class="topic-tag">Credentials</span>
+        <span class="topic-tag">aws sts</span>
+        <span class="topic-tag">Hands-on Playground</span>
+    </div>
+</div>
+
+<div class="card" id="card"></div>
+
+<script>
+    var questions = [
+      // ── Installation CLI ──────────────────────────────────────────────────
+      {
+        chapter: "Installation CLI",
+        q: "Quels systèmes d'exploitation sont officiellement supportés par AWS CLI v2 ? (Choisissez 3)",
+        type: "multiple",
+        opts: [
+          "Linux",
+          "macOS",
+          "Windows",
+          "FreeBSD",
+          "ChromeOS"
+        ],
+        correct: [0, 1, 2],
+        expl: "<strong>Réponses A, B et C.</strong> AWS CLI v2 supporte officiellement Linux, macOS et Windows. FreeBSD et ChromeOS ne figurent pas dans la liste des systèmes officiellement supportés selon la documentation AWS. Pour les environnements non supportés, des solutions alternatives comme les conteneurs Docker peuvent être utilisées."
+      },
+      {
+        chapter: "Installation CLI",
+        q: "Après avoir installé AWS CLI v2 sur macOS, quelles commandes permettent de vérifier que l'installation s'est déroulée correctement ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "<code>aws --version</code>",
+          "<code>aws status</code>",
+          "<code>which aws</code>",
+          "<code>aws check-install</code>",
+          "<code>aws self-test</code>"
+        ],
+        correct: [0, 2],
+        expl: "<strong>Réponses A et C.</strong> <code>aws --version</code> affiche la version installée et confirme que le binaire est accessible (doit afficher 'aws-cli/2.x.x'). <code>which aws</code> indique le chemin d'installation du binaire. Les commandes <code>aws status</code>, <code>aws check-install</code> et <code>aws self-test</code> n'existent pas dans AWS CLI."
+      },
+      {
+        chapter: "Installation CLI",
+        q: "Lors d'une démonstration, un instructeur ajoute un flag de désactivation de vérification SSL lors du téléchargement de l'AWS CLI. Quelle affirmation est correcte à ce sujet ?",
+        type: "single",
+        opts: [
+          "C'est une bonne pratique recommandée par AWS pour accélérer l'installation",
+          "C'est acceptable uniquement dans un contexte de démonstration ou de lab, jamais en production",
+          "Ce flag est obligatoire sur macOS uniquement pour des raisons de sécurité système",
+          "La désactivation SSL est sans risque car AWS CLI v2 vérifie ses propres signatures de paquets"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Désactiver la vérification SSL expose au risque d'attaques man-in-the-middle et ne doit <em>jamais</em> être fait en production. Cette pratique n'est acceptable qu'en environnement de lab ou de démonstration contrôlé. En production, toujours laisser la vérification SSL active et résoudre les problèmes de certificat par les voies appropriées."
+      },
+      {
+        chapter: "Installation CLI",
+        q: "Pourquoi est-il recommandé d'apprendre à utiliser AWS CLI sur Linux, même si l'on travaille habituellement sur macOS ou Windows ?",
+        type: "single",
+        opts: [
+          "Parce que l'AWS CLI n'est disponible que sur Linux dans les environnements professionnels",
+          "Parce que Linux est le système d'exploitation dominant dans le cloud et sa maîtrise est essentielle en environnement réel",
+          "Parce que les commandes AWS CLI sont différentes sur Linux et nécessitent un apprentissage séparé",
+          "Parce que macOS et Windows ne supportent pas les profils CLI avancés"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Linux domine massivement les environnements cloud (instances EC2, conteneurs, Lambda, etc.). La maîtrise de Linux est un atout majeur en environnement réel et pour la certification AWS. Les commandes AWS CLI sont identiques sur les trois OS — seule la procédure d'installation diffère légèrement."
+      },
+
+      // ── Configuration & Credentials ───────────────────────────────────────
+      {
+        chapter: "Configuration CLI",
+        q: "Lors de l'exécution de <code>aws configure</code>, dans quel ordre les informations sont-elles demandées ?",
+        type: "single",
+        opts: [
+          "Region → Output format → Access Key ID → Secret Access Key",
+          "Access Key ID → Secret Access Key → Default region → Default output format",
+          "Secret Access Key → Access Key ID → Output format → Region",
+          "Default region → Access Key ID → Secret Access Key → Output format"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> La commande <code>aws configure</code> demande dans l'ordre : (1) AWS Access Key ID, (2) AWS Secret Access Key, (3) Default region name, (4) Default output format. Retenir cet ordre est utile pour les automatisations et les scripts de configuration."
+      },
+      {
+        chapter: "Configuration CLI",
+        q: "Où sont stockés les credentials et la configuration après l'exécution de <code>aws configure</code> ? (Choisissez 2)",
+        type: "multiple",
+        opts: [
+          "<code>~/.aws/credentials</code> — contient l'Access Key ID et le Secret Access Key",
+          "<code>~/.aws/config</code> — contient la région et le format de sortie par défaut",
+          "<code>/etc/aws/credentials</code> — fichier global partagé entre tous les utilisateurs",
+          "<code>~/.aws/secrets</code> — fichier chiffré AES-256 pour les credentials sensibles",
+          "<code>/usr/local/aws/config</code> — répertoire d'installation de la CLI"
+        ],
+        correct: [0, 1],
+        expl: "<strong>Réponses A et B.</strong> AWS CLI stocke les credentials dans <code>~/.aws/credentials</code> (Access Key ID + Secret Access Key) et la configuration dans <code>~/.aws/config</code> (région, format de sortie, profils). Ces fichiers sont en texte clair et doivent être protégés avec des permissions appropriées. Il n'existe pas de <code>~/.aws/secrets</code> ni de fichier global dans <code>/etc/aws</code>."
+      },
+      {
+        chapter: "Configuration CLI",
+        q: "Quelle région est recommandée lors de la configuration du CLI dans un environnement sandbox Pluralsight, et pourquoi ?",
+        type: "single",
+        opts: [
+          "<code>eu-west-1</code>, car c'est la région avec le moins de latence depuis l'Europe",
+          "<code>us-east-1</code>, car les sandboxes peuvent avoir des restrictions dans d'autres régions",
+          "<code>us-west-2</code>, car c'est la région par défaut d'AWS pour tous les nouveaux comptes",
+          "N'importe quelle région ; les sandboxes n'ont aucune restriction géographique"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> <code>us-east-1</code> (N. Virginia) est recommandée dans les sandboxes Pluralsight car les autres régions peuvent être restreintes dans les comptes sandbox. C'est aussi la région où AWS déploie ses nouveaux services en premier, ce qui la rend plus complète pour les labs."
+      },
+      {
+        chapter: "Configuration CLI",
+        q: "Un développeur travaille sur deux projets avec des comptes AWS distincts. Comment doit-il configurer son environnement CLI pour gérer les deux sans conflit ?",
+        type: "single",
+        opts: [
+          "Exécuter <code>aws configure</code> deux fois — la seconde exécution écrase la première",
+          "Utiliser deux installations séparées d'AWS CLI v2 dans des répertoires différents",
+          "Créer des profils nommés avec <code>aws configure --profile &lt;nom&gt;</code> et utiliser <code>--profile</code> dans chaque commande",
+          "Définir des variables d'environnement différentes pour chaque session de terminal"
+        ],
+        correct: [2],
+        expl: "<strong>Réponse C.</strong> Les profils CLI (<code>aws configure --profile projet-a</code>) permettent de stocker plusieurs ensembles de credentials sous des noms distincts dans <code>~/.aws/credentials</code>. Pour utiliser un profil : <code>aws s3 ls --profile projet-a</code>. C'est la méthode officielle AWS pour les environnements multi-comptes. La réponse D (variables d'env) est aussi valide techniquement mais moins pérenne."
+      },
+
+      // ── Authentification & STS ────────────────────────────────────────────
+      {
+        chapter: "Authentification & STS",
+        q: "Quelle commande AWS CLI permet de vérifier l'identité de l'utilisateur actuellement authentifié et de confirmer que le CLI est bien configuré ?",
+        type: "single",
+        opts: [
+          "<code>aws iam get-user</code>",
+          "<code>aws sts get-caller-identity</code>",
+          "<code>aws configure list</code>",
+          "<code>aws whoami</code>"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> <code>aws sts get-caller-identity</code> est la commande de référence pour vérifier l'authentification. Elle retourne le UserID, l'Account ID et l'ARN de l'identité connectée — sans nécessiter de permissions IAM spécifiques. <code>aws iam get-user</code> fonctionne pour les utilisateurs IAM mais échoue pour les rôles. <code>aws whoami</code> n'existe pas."
+      },
+      {
+        chapter: "Authentification & STS",
+        q: "La réponse de <code>aws sts get-caller-identity</code> contient trois champs. Lesquels ? (Choisissez 3)",
+        type: "multiple",
+        opts: [
+          "UserId",
+          "Account",
+          "Arn",
+          "Region",
+          "AccessKeyId"
+        ],
+        correct: [0, 1, 2],
+        expl: "<strong>Réponses A, B et C.</strong> <code>aws sts get-caller-identity</code> retourne exactement trois champs : <code>UserId</code> (identifiant unique de l'entité), <code>Account</code> (numéro de compte AWS à 12 chiffres), et <code>Arn</code> (Amazon Resource Name complet de l'identité). La région et l'Access Key ID ne font pas partie de cette réponse."
+      },
+      {
+        chapter: "Authentification & STS",
+        q: "Qu'est-ce qu'une paire Access Key ID / Secret Access Key dans le contexte AWS CLI ?",
+        type: "single",
+        opts: [
+          "Un certificat TLS utilisé pour chiffrer les communications entre le CLI et AWS",
+          "Des credentials programmatiques associés à un utilisateur ou rôle IAM, permettant l'authentification via le CLI ou les SDK",
+          "Un token temporaire généré à chaque connexion et valable 15 minutes",
+          "Le nom d'utilisateur et le mot de passe du compte root AWS"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Une paire Access Key ID / Secret Access Key est un ensemble de credentials programmatiques associé à un utilisateur IAM (ou généré via STS pour des rôles). Ils permettent d'authentifier les appels API via le CLI, les SDK ou des appels HTTP directs. Contrairement aux tokens STS temporaires, les clés IAM sont persistantes jusqu'à leur révocation manuelle. Il ne faut jamais les confondre avec le mot de passe console (D)."
+      },
+      {
+        chapter: "Authentification & STS",
+        q: "Un développeur configure le CLI avec des credentials d'un sandbox Pluralsight et souhaite lister les buckets S3. Quelle commande est correcte, en tenant compte des éventuels problèmes de certificat SSL dans certains environnements ?",
+        type: "single",
+        opts: [
+          "<code>aws s3 ls --skip-ssl</code>",
+          "<code>aws s3 ls --no-verify-ssl</code>",
+          "<code>aws s3 ls --disable-tls</code>",
+          "<code>aws s3 ls --insecure</code>"
+        ],
+        correct: [1],
+        expl: "<strong>Réponse B.</strong> Le flag officiel AWS CLI pour désactiver la vérification SSL est <code>--no-verify-ssl</code>. Il est applicable à toutes les commandes AWS CLI. Rappel : ce flag ne doit être utilisé qu'en environnement de lab ou de démonstration, jamais en production. Les autres options (<code>--skip-ssl</code>, <code>--disable-tls</code>, <code>--insecure</code>) ne sont pas des flags valides dans AWS CLI."
+      }
+    ];
+
+    var qIdx = 0;
+    var selected = [];
+    var answered = false;
+    var score = 0;
+
+    function paint() {
+      var q = questions[qIdx];
+      var letters = ['A','B','C','D','E'];
+      var isMultiple = q.type === 'multiple';
+      var progressPct = Math.round((qIdx / questions.length) * 100);
+
+      var optsHTML = '';
+      for (var i = 0; i < q.opts.length; i++) {
+        optsHTML += '<div class="option" id="opt' + i + '" onclick="pickOption(' + i + ')">' +
+          '<span class="letter">' + letters[i] + '</span>' +
+          '<span>' + q.opts[i] + '</span>' +
+        '</div>';
+      }
+
+      var html =
+        '<div class="progress-wrap">' +
+          '<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + progressPct + '%"></div></div>' +
+          '<span class="progress-label">' + (qIdx + 1) + ' / ' + questions.length + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:12px;">' +
+          '<span class="badge ' + (isMultiple ? 'multiple' : 'single') + '">' +
+            (isMultiple ? 'Réponses multiples' : 'Réponse unique') +
+          '</span>' +
+          '<span class="chapter-tag">' + q.chapter + '</span>' +
+        '</div>' +
+        '<div class="question-num">Question ' + (qIdx + 1) + ' sur ' + questions.length + '</div>' +
+        '<div class="question-text">' + q.q + '</div>' +
+        '<div class="options">' + optsHTML + '</div>' +
+        '<div class="actions">' +
+          '<button class="btn btn-primary" id="btnValidate" onclick="valider()" disabled>Valider</button>' +
+          '<button class="btn btn-primary" id="btnNext" onclick="suivante()" style="display:none">Question suivante →</button>' +
+        '</div>' +
+        '<div class="explanation" id="expl"></div>';
+
+      document.getElementById('card').innerHTML = html;
+    }
+
+    function pickOption(idx) {
+      if (answered) return;
+      var q = questions[qIdx];
+      var isMultiple = q.type === 'multiple';
+
+      if (isMultiple) {
+        var pos = selected.indexOf(idx);
+        if (pos === -1) { selected.push(idx); } else { selected.splice(pos, 1); }
+      } else {
+        selected = [idx];
+      }
+
+      for (var i = 0; i < q.opts.length; i++) {
+        var el = document.getElementById('opt' + i);
+        el.className = selected.indexOf(i) !== -1 ? 'option selected' : 'option';
+      }
+
+      document.getElementById('btnValidate').disabled = selected.length === 0;
+    }
+
+    function valider() {
+      if (answered) return;
+      answered = true;
+
+      var q = questions[qIdx];
+      var correct = q.correct;
+
+      var isRight = true;
+      if (selected.length !== correct.length) {
+        isRight = false;
+      } else {
+        for (var i = 0; i < correct.length; i++) {
+          if (selected.indexOf(correct[i]) === -1) { isRight = false; break; }
+        }
+      }
+      if (isRight) score++;
+
+      for (var i = 0; i < q.opts.length; i++) {
+        var el = document.getElementById('opt' + i);
+        var isSel = selected.indexOf(i) !== -1;
+        var isCorr = correct.indexOf(i) !== -1;
+        if (isSel && isCorr) { el.className = 'option disabled correct'; }
+        else if (isSel && !isCorr) { el.className = 'option disabled wrong'; }
+        else if (!isSel && isCorr) { el.className = 'option disabled missed'; }
+        else { el.className = 'option disabled'; }
+      }
+
+      var expl = document.getElementById('expl');
+      expl.innerHTML = q.expl;
+      expl.className = 'explanation show';
+
+      document.getElementById('btnValidate').style.display = 'none';
+      document.getElementById('btnNext').style.display = 'inline-block';
+      if (qIdx === questions.length - 1) {
+        document.getElementById('btnNext').textContent = 'Voir le score →';
+      }
+    }
+
+    function suivante() {
+      qIdx++;
+      selected = [];
+      answered = false;
+      if (qIdx < questions.length) { paint(); } else { paintScore(); }
+    }
+
+    function paintScore() {
+      var pct = Math.round((score / questions.length) * 100);
+      var color, msg, detail;
+
+      if (pct >= 80) {
+        color = '#22c55e';
+        msg = '🎉 Excellent résultat !';
+        detail = 'Vous maîtrisez bien l\'installation et la configuration de l\'AWS CLI, la gestion des credentials et des profils. Ces compétences pratiques sont essentielles pour tous les labs de la certification SAA-C03.';
+      } else if (pct >= 60) {
+        color = '#f59e0b';
+        msg = '👍 Bon niveau — quelques points à consolider';
+        detail = 'Revoyez les commandes clés : aws configure, aws sts get-caller-identity, la gestion des profils et l\'emplacement des fichiers de credentials.';
+      } else {
+        color = '#ef4444';
+        msg = '📚 Des révisions s\'imposent';
+        detail = 'Reprenez les deux démos : installation de l\'AWS CLI et configuration via aws configure. Pratiquez ces commandes dans un environnement sandbox pour les ancrer.';
+      }
+
+      var html =
+        '<div class="score-screen">' +
+          '<div style="font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--blue);background:#eaf3ff;display:inline-block;padding:4px 12px;border-radius:20px;margin-bottom:12px;">Résultats finaux</div>' +
+          '<div class="score-big">' + score + '/' + questions.length + '</div>' +
+          '<div class="score-sub">' + pct + '% de bonnes réponses</div>' +
+          '<div class="score-bar-wrap"><div class="score-bar-fill" id="scoreFill" style="width:0%;background:' + color + '"></div></div>' +
+          '<div class="score-msg">' + msg + '</div>' +
+          '<div class="score-detail">' + detail + '</div>' +
+          '<div class="score-breakdown">' +
+            '<span class="score-pill">Installation CLI · 4 q</span>' +
+            '<span class="score-pill">Configuration CLI · 4 q</span>' +
+            '<span class="score-pill">Authentification & STS · 4 q</span>' +
+          '</div>' +
+          '<div class="divider"></div>' +
+          '<button class="btn btn-primary" onclick="recommencer()">↺ Recommencer le QCM</button>' +
+        '</div>';
+
+      document.getElementById('card').innerHTML = html;
+
+      setTimeout(function() {
+        var fill = document.getElementById('scoreFill');
+        if (fill) fill.style.width = pct + '%';
+      }, 100);
+    }
+
+    function recommencer() {
+      qIdx = 0;
+      selected = [];
+      answered = false;
+      score = 0;
+      paint();
+    }
+
+    paint();
+</script>
+</body>
+</html>

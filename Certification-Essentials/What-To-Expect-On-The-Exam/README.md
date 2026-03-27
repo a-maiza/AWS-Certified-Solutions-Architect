@@ -8,13 +8,13 @@ Présentation de l'**examen AWS Certified Solutions Architect Associate** : stru
 
 ## Concepts clés
 
-| Élément | Détail |
-|---|---|
-| **Nombre de questions** | 65 (dont 15 non notées, indistinguables) |
-| **Types de questions** | QCM (1 bonne réponse) / QRM (2+ bonnes réponses) |
-| **Durée** | 130 min (+ 30 min si anglais langue étrangère) |
-| **Score de passage** | 720 / 1000 (score pondéré) |
-| **Expérience recommandée** | 1 an de pratique AWS |
+| Élément                    | Détail                                           |
+|----------------------------|--------------------------------------------------|
+| **Nombre de questions**    | 65 (dont 15 non notées, indistinguables)         |
+| **Types de questions**     | QCM (1 bonne réponse) / QRM (2+ bonnes réponses) |
+| **Durée**                  | 130 min (+ 30 min si anglais langue étrangère)   |
+| **Score de passage**       | 720 / 1000 (score pondéré)                       |
+| **Expérience recommandée** | 1 an de pratique AWS                             |
 
 ---
 
